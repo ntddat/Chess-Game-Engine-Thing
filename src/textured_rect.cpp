@@ -24,6 +24,19 @@ void TexturedRect::setProperties(int x, int y, int width, int height) {
   rect.h = height;
 }
 
+void TexturedRect::setCoordinates(int x, int y) {
+  rect.x = x;
+  rect.y = y;
+}
+
+int TexturedRect::getXValue() {
+  return rect.x;
+}
+
+int TexturedRect::getYValue() {
+  return rect.y;
+}
+
 void TexturedRect::render(SDL_Renderer *&renderer) {
   SDL_RenderCopy(renderer, texture, NULL, &rect);
 }
