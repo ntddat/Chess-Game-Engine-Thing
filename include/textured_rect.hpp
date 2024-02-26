@@ -19,6 +19,12 @@ class TexturedRect {
     // Set rectangle properties
     void setProperties(int x, int y, int width, int height);
 
+    void setCoordinates(int x, int y);
+
+    int getXValue();
+
+    int getYValue();
+
     // Render the texture
     void render(SDL_Renderer *&renderer);
 };
