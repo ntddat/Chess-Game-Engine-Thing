@@ -131,7 +131,11 @@ int main() {
 
   // Game loop
   bool gameRunning = true;
+  bool leftMBPressed = false;
+  int mouseX;
+  int mouseY;
   while (gameRunning) {
+    SDL_GetMouseState(&mouseX, &mouseY);
 
     /* EVENT HANDLING */
     SDL_Event event;
@@ -145,7 +149,14 @@ int main() {
         }
       }
       if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT) {
-
+        // if (wQ->getXValue() <= event.button.x <= (wQ->getXValue() + PIECE_SIDE) &&
+            // wQ->getYValue() <= event.button.y <= (wQ->getYValue() + PIECE_SIDE)) {
+          // wQ->setCoordinates(event.button.x, event.button.y);
+        // }
+        leftMBPressed = true;
+      }
+      if (event.type == SDL_MOUSEBUTTONUP && event.button.button == SDL_BUTTON_LEFT) {
+        leftMBPressed = false;
       }
     }
 
@@ -163,6 +174,14 @@ int main() {
     for (int i = 0; i < CHESS_SIDE; i++) {
       bPiecesArr[i]->render(renderer);
       bPArr[i]->render(renderer);
+    }
+
+    /* LOGIC */ 
+    
+    if (leftMBPressed &&
+        wQ->getXValue() <= event.button.x <= (wQ->getXValue() + PIECE_SIDE) &&
+        wQ->getYValue() <= event.button.y <= (wQ->getYValue() + PIECE_SIDE)) {
+      wQ->setCoordinates(mouseX - PIECE_SIDE/2, mouseY - PIECE_SIDE/2);
     }
 
     SDL_RenderPresent(renderer);
