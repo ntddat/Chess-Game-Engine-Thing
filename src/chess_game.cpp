@@ -12,12 +12,12 @@ using namespace std;
 
 #define CHESS_SIDE 8
 #define SQUARE_SIDE 90
-#define PIECE_SIDE 80
-#define EXTRA 5
-#define WHITE_PAWN_ROW 545
-#define WHITE_PIECE_ROW 635
-#define BLACK_PAWN_ROW 95
-#define BLACK_PIECE_ROW 5
+#define PIECE_SIDE 90
+#define EXTRA 0
+#define WHITE_PAWN_ROW 540
+#define WHITE_PIECE_ROW 630
+#define BLACK_PAWN_ROW 90
+#define BLACK_PIECE_ROW 0
 
 int main() {
   SDL_Window *window;
@@ -41,83 +41,93 @@ int main() {
 
   renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
-  // The board
+  /* CHESSBOARD */
   TexturedRect board(renderer, "../images/Chessboard2048.bmp");
   board.setProperties(0, 0, 720, 720);
 
-  // White pieces
+  /* WHITE PIECES */
+  // Array that stores the pieces
   vector<shared_ptr<TexturedRect>> wPiecesArr;
+  // King
   shared_ptr<TexturedRect> wK = make_shared<TexturedRect>(renderer, "../images/wk.bmp");
-  wK->setProperties(4*SQUARE_SIDE + EXTRA, WHITE_PIECE_ROW, PIECE_SIDE, PIECE_SIDE);
+  wK->setProperties(4*SQUARE_SIDE, WHITE_PIECE_ROW, PIECE_SIDE, PIECE_SIDE);
   wPiecesArr.push_back(wK);
+  // Queen
   shared_ptr<TexturedRect> wQ = make_shared<TexturedRect>(renderer, "../images/wq.bmp");
-  wQ->setProperties(3*SQUARE_SIDE + EXTRA, WHITE_PIECE_ROW, PIECE_SIDE, PIECE_SIDE);
+  wQ->setProperties(3*SQUARE_SIDE, WHITE_PIECE_ROW, PIECE_SIDE, PIECE_SIDE);
   wPiecesArr.push_back(wQ);
+  // Bishops
   shared_ptr<TexturedRect> wB1 = make_shared<TexturedRect>(renderer, "../images/wb.bmp");
-  wB1->setProperties(2*SQUARE_SIDE + EXTRA, WHITE_PIECE_ROW, PIECE_SIDE, PIECE_SIDE);
+  wB1->setProperties(2*SQUARE_SIDE, WHITE_PIECE_ROW, PIECE_SIDE, PIECE_SIDE);
   wPiecesArr.push_back(wB1);
   shared_ptr<TexturedRect> wB2 = make_shared<TexturedRect>(renderer, "../images/wb.bmp");
-  wB2->setProperties(5*SQUARE_SIDE + EXTRA, WHITE_PIECE_ROW, PIECE_SIDE, PIECE_SIDE);
+  wB2->setProperties(5*SQUARE_SIDE, WHITE_PIECE_ROW, PIECE_SIDE, PIECE_SIDE);
   wPiecesArr.push_back(wB2);
+  // Knights
   shared_ptr<TexturedRect> wN1 = make_shared<TexturedRect>(renderer, "../images/wn.bmp");
-  wN1->setProperties(SQUARE_SIDE + EXTRA, WHITE_PIECE_ROW, PIECE_SIDE, PIECE_SIDE);
+  wN1->setProperties(SQUARE_SIDE, WHITE_PIECE_ROW, PIECE_SIDE, PIECE_SIDE);
   wPiecesArr.push_back(wN1);
   shared_ptr<TexturedRect> wN2 = make_shared<TexturedRect>(renderer, "../images/wn.bmp");
-  wN2->setProperties(6*SQUARE_SIDE + EXTRA, WHITE_PIECE_ROW, PIECE_SIDE, PIECE_SIDE);
+  wN2->setProperties(6*SQUARE_SIDE, WHITE_PIECE_ROW, PIECE_SIDE, PIECE_SIDE);
   wPiecesArr.push_back(wN2);
+  // Rooks
   shared_ptr<TexturedRect> wR1 = make_shared<TexturedRect>(renderer, "../images/wr.bmp");
-  wR1->setProperties(EXTRA, WHITE_PIECE_ROW, PIECE_SIDE, PIECE_SIDE);
+  wR1->setProperties(0, WHITE_PIECE_ROW, PIECE_SIDE, PIECE_SIDE);
   wPiecesArr.push_back(wR1);
   shared_ptr<TexturedRect> wR2 = make_shared<TexturedRect>(renderer, "../images/wr.bmp");
-  wR2->setProperties(7*SQUARE_SIDE + EXTRA, WHITE_PIECE_ROW, PIECE_SIDE, PIECE_SIDE);
+  wR2->setProperties(7*SQUARE_SIDE, WHITE_PIECE_ROW, PIECE_SIDE, PIECE_SIDE);
   wPiecesArr.push_back(wR2);
-  // TexturedRect *wPArr = (TexturedRect *)malloc(sizeof(TexturedRect) * CHESS_SIDE);
+
+  // Array to store the pawns
   vector<shared_ptr<TexturedRect>> wPArr;
+  // Pawns
   for (int i = 0; i < CHESS_SIDE; i++) {
     shared_ptr<TexturedRect> wP = make_shared<TexturedRect>(renderer, "../images/wp.bmp");
-    wP->setProperties(i*SQUARE_SIDE + EXTRA, WHITE_PAWN_ROW, PIECE_SIDE, PIECE_SIDE);
+    wP->setProperties(i*SQUARE_SIDE, WHITE_PAWN_ROW, PIECE_SIDE, PIECE_SIDE);
     wPArr.push_back(wP);
   }
-  // for (int i = 0; i < CHESS_SIDE; i++) {
-    // wPArr[i]->setProperties(i*SQUARE_SIDE + EXTRA, WHITE_PAWN_ROW, PIECE_SIDE, PIECE_SIDE);
-  // }
 
-
-  // Black pieces
+  /* BLACK PIECES */
+  // Array to store the pieces
   vector<shared_ptr<TexturedRect>> bPiecesArr;
+  // King
   shared_ptr<TexturedRect> bK = make_shared<TexturedRect>(renderer, "../images/bk.bmp");
-  bK->setProperties(4*SQUARE_SIDE + EXTRA, BLACK_PIECE_ROW, PIECE_SIDE, PIECE_SIDE);
+  bK->setProperties(4*SQUARE_SIDE, BLACK_PIECE_ROW, PIECE_SIDE, PIECE_SIDE);
   bPiecesArr.push_back(bK);
+  // Queen
   shared_ptr<TexturedRect> bQ = make_shared<TexturedRect>(renderer, "../images/bq.bmp");
-  bQ->setProperties(3*SQUARE_SIDE + EXTRA, BLACK_PIECE_ROW, PIECE_SIDE, PIECE_SIDE);
+  bQ->setProperties(3*SQUARE_SIDE, BLACK_PIECE_ROW, PIECE_SIDE, PIECE_SIDE);
   bPiecesArr.push_back(bQ);
+  // Bishops
   shared_ptr<TexturedRect> bB1 = make_shared<TexturedRect>(renderer, "../images/bb.bmp");
-  bB1->setProperties(2*SQUARE_SIDE + EXTRA, BLACK_PIECE_ROW, PIECE_SIDE, PIECE_SIDE);
+  bB1->setProperties(2*SQUARE_SIDE, BLACK_PIECE_ROW, PIECE_SIDE, PIECE_SIDE);
   bPiecesArr.push_back(bB1);
   shared_ptr<TexturedRect> bB2 = make_shared<TexturedRect>(renderer, "../images/bb.bmp");
-  bB2->setProperties(5*SQUARE_SIDE + EXTRA, BLACK_PIECE_ROW, PIECE_SIDE, PIECE_SIDE);
+  bB2->setProperties(5*SQUARE_SIDE, BLACK_PIECE_ROW, PIECE_SIDE, PIECE_SIDE);
   bPiecesArr.push_back(bB2);
+  // Knights
   shared_ptr<TexturedRect> bN1 = make_shared<TexturedRect>(renderer, "../images/bn.bmp");
-  bN1->setProperties(SQUARE_SIDE + EXTRA, BLACK_PIECE_ROW, PIECE_SIDE, PIECE_SIDE);
+  bN1->setProperties(SQUARE_SIDE, BLACK_PIECE_ROW, PIECE_SIDE, PIECE_SIDE);
   bPiecesArr.push_back(bN1);
   shared_ptr<TexturedRect> bN2 = make_shared<TexturedRect>(renderer, "../images/bn.bmp");
-  bN2->setProperties(6*SQUARE_SIDE + EXTRA, BLACK_PIECE_ROW, PIECE_SIDE, PIECE_SIDE);
+  bN2->setProperties(6*SQUARE_SIDE, BLACK_PIECE_ROW, PIECE_SIDE, PIECE_SIDE);
   bPiecesArr.push_back(bN2);
+  // Rooks
   shared_ptr<TexturedRect> bR1 = make_shared<TexturedRect>(renderer, "../images/br.bmp");
-  bR1->setProperties(EXTRA, BLACK_PIECE_ROW, PIECE_SIDE, PIECE_SIDE);
+  bR1->setProperties(0, BLACK_PIECE_ROW, PIECE_SIDE, PIECE_SIDE);
   bPiecesArr.push_back(bR1);
   shared_ptr<TexturedRect> bR2 = make_shared<TexturedRect>(renderer, "../images/br.bmp");
-  bR2->setProperties(7*SQUARE_SIDE + EXTRA, BLACK_PIECE_ROW, PIECE_SIDE, PIECE_SIDE);
+  bR2->setProperties(7*SQUARE_SIDE, BLACK_PIECE_ROW, PIECE_SIDE, PIECE_SIDE);
   bPiecesArr.push_back(bR2);
+
+  // Array to store the pawns
   vector<shared_ptr<TexturedRect>> bPArr;
+  // Pawns
   for (int i = 0; i < CHESS_SIDE; i++) {
     shared_ptr<TexturedRect> bP = make_shared<TexturedRect>(renderer, "../images/bp.bmp");
-    bP->setProperties(i*SQUARE_SIDE + EXTRA, BLACK_PAWN_ROW, PIECE_SIDE, PIECE_SIDE);
+    bP->setProperties(i*SQUARE_SIDE, BLACK_PAWN_ROW, PIECE_SIDE, PIECE_SIDE);
     bPArr.push_back(bP);
   }
-  // for (int i = 0; i < CHESS_SIDE; i++) {
-    // bPArr[i]->setProperties(i*SQUARE_SIDE + EXTRA, BLACK_PAWN_ROW, PIECE_SIDE, PIECE_SIDE);
-  // }
 
   // Game loop
   bool gameRunning = true;
@@ -134,6 +144,9 @@ int main() {
           gameRunning = false;
         }
       }
+      if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT) {
+
+      }
     }
 
     /* RENDERING */
@@ -141,34 +154,14 @@ int main() {
     board.render(renderer);
 
     // Rendering white pieces
-    // wK.render(renderer);
-    // wQ.render(renderer);
-    // wB1.render(renderer);
-    // wB2.render(renderer);
-    // wN1.render(renderer);
-    // wN2.render(renderer);
-    // wR1.render(renderer);
-    // wR2.render(renderer);
     for (int i = 0; i < CHESS_SIDE; i++) {
       wPiecesArr[i]->render(renderer);
-    }
-    for (int i = 0; i < CHESS_SIDE; i++) {
       wPArr[i]->render(renderer);
     }
 
     // Rendering black pieces
-    // bK.render(renderer);
-    // bQ.render(renderer);
-    // bB1.render(renderer);
-    // bB2.render(renderer);
-    // bN1.render(renderer);
-    // bN2.render(renderer);
-    // bR1.render(renderer);
-    // bR2.render(renderer);
     for (int i = 0; i < CHESS_SIDE; i++) {
       bPiecesArr[i]->render(renderer);
-    }
-    for (int i = 0; i < CHESS_SIDE; i++) {
       bPArr[i]->render(renderer);
     }
 
