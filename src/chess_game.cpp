@@ -134,6 +134,7 @@ int main() {
   bool leftMBPressed = false;
   int mouseX;
   int mouseY;
+  shared_ptr<TexturedRect> currPiece;
   while (gameRunning) {
     SDL_GetMouseState(&mouseX, &mouseY);
 
@@ -149,10 +150,6 @@ int main() {
         }
       }
       if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT) {
-        // if (wQ->getXValue() <= event.button.x <= (wQ->getXValue() + PIECE_SIDE) &&
-            // wQ->getYValue() <= event.button.y <= (wQ->getYValue() + PIECE_SIDE)) {
-          // wQ->setCoordinates(event.button.x, event.button.y);
-        // }
         leftMBPressed = true;
       }
       if (event.type == SDL_MOUSEBUTTONUP && event.button.button == SDL_BUTTON_LEFT) {
@@ -177,11 +174,17 @@ int main() {
     }
 
     /* LOGIC */ 
+    if (wQ->getXValue() <= mouseX && mouseX <= (wQ->getXValue() + PIECE_SIDE) &&
+        wQ->getYValue() <= mouseY && mouseY <= (wQ->getYValue() + PIECE_SIDE)) {
+      currPiece = wQ;
+    }
     
-    if (leftMBPressed &&
-        wQ->getXValue() <= event.button.x <= (wQ->getXValue() + PIECE_SIDE) &&
-        wQ->getYValue() <= event.button.y <= (wQ->getYValue() + PIECE_SIDE)) {
-      wQ->setCoordinates(mouseX - PIECE_SIDE/2, mouseY - PIECE_SIDE/2);
+    if (leftMBPressed && currPiece != NULL) {
+      currPiece->setCoordinates(mouseX - PIECE_SIDE/2, mouseY - PIECE_SIDE/2);
+    }
+
+    if (!leftMBPressed) {
+      currPiece = NULL;
     }
 
     SDL_RenderPresent(renderer);
