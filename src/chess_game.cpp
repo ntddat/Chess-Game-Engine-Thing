@@ -135,11 +135,13 @@ int main() {
   int mouseX;
   int mouseY;
   shared_ptr<TexturedRect> currPiece;
+  shared_ptr<TexturedRect> movePiece;
+  int originalX, originalY;
   while (gameRunning) {
     SDL_GetMouseState(&mouseX, &mouseY);
-    if (mouseX > 720) {
-      leftMBPressed = false;
-    }
+    // if (mouseX > 720) {
+      // leftMBPressed = false;
+    // }
 
     /* EVENT HANDLING */
     SDL_Event event;
@@ -185,6 +187,8 @@ int main() {
           wPiecesArr[i]->getYValue() <= mouseY && 
           mouseY <= (wPiecesArr[i]->getYValue() + PIECE_SIDE)) {
         currPiece = wPiecesArr[i];
+        originalX = currPiece->getXValue();
+        originalY = currPiece->getYValue();
       }
     }
     
@@ -194,6 +198,8 @@ int main() {
           wPArr[i]->getYValue() <= mouseY && 
           mouseY <= (wPArr[i]->getYValue() + PIECE_SIDE)) {
         currPiece = wPArr[i];
+        originalX = currPiece->getXValue();
+        originalY = currPiece->getYValue();
       }
     }
     
@@ -203,6 +209,8 @@ int main() {
           bPiecesArr[i]->getYValue() <= mouseY && 
           mouseY <= (bPiecesArr[i]->getYValue() + PIECE_SIDE)) {
         currPiece = bPiecesArr[i];
+        originalX = currPiece->getXValue();
+        originalY = currPiece->getYValue();
       }
     }
     
@@ -212,15 +220,35 @@ int main() {
           bPArr[i]->getYValue() <= mouseY && 
           mouseY <= (bPArr[i]->getYValue() + PIECE_SIDE)) {
         currPiece = bPArr[i];
+        originalX = currPiece->getXValue();
+        originalY = currPiece->getYValue();
       }
     }
 
     if (leftMBPressed && currPiece != NULL) {
-      currPiece->setCoordinates(mouseX - PIECE_SIDE/2, mouseY - PIECE_SIDE/2);
+      movePiece = currPiece;
+      // originalX = movePiece->getXValue();
+      // originalY = movePiece->getYValue();
+      movePiece->setCoordinates(mouseX - PIECE_SIDE/2, mouseY - PIECE_SIDE/2);
     }
 
     if (!leftMBPressed) {
+      if (movePiece != NULL) {
+        int squareX, squareY;
+        if (mouseX < 720) {
+          squareX = mouseX - (mouseX % SQUARE_SIDE);
+          squareY = mouseY - (mouseY % SQUARE_SIDE);
+        }
+        else {
+          squareX = originalX;
+          squareY = originalY;
+        }
+        movePiece->setCoordinates(squareX, squareY);
+      }
       currPiece = NULL;
+      movePiece = NULL;
+      originalX = 0;
+      originalY = 0;
     }
 
 
