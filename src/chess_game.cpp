@@ -137,6 +137,9 @@ int main() {
   shared_ptr<TexturedRect> currPiece;
   while (gameRunning) {
     SDL_GetMouseState(&mouseX, &mouseY);
+    if (mouseX > 720) {
+      leftMBPressed = false;
+    }
 
     /* EVENT HANDLING */
     SDL_Event event;
@@ -158,6 +161,8 @@ int main() {
     }
 
     /* RENDERING */
+    SDL_RenderClear(renderer);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
     // Rendering the board
     board.render(renderer);
 
@@ -174,11 +179,42 @@ int main() {
     }
 
     /* LOGIC */ 
-    if (wQ->getXValue() <= mouseX && mouseX <= (wQ->getXValue() + PIECE_SIDE) &&
-        wQ->getYValue() <= mouseY && mouseY <= (wQ->getYValue() + PIECE_SIDE)) {
-      currPiece = wQ;
+    for (int i = 0; i < CHESS_SIDE && currPiece == NULL; i++) {
+      if (wPiecesArr[i]->getXValue() <= mouseX && 
+          mouseX <= (wPiecesArr[i]->getXValue() + PIECE_SIDE) &&
+          wPiecesArr[i]->getYValue() <= mouseY && 
+          mouseY <= (wPiecesArr[i]->getYValue() + PIECE_SIDE)) {
+        currPiece = wPiecesArr[i];
+      }
     }
     
+    for (int i = 0; i < CHESS_SIDE && currPiece == NULL; i++) {
+      if (wPArr[i]->getXValue() <= mouseX && 
+          mouseX <= (wPArr[i]->getXValue() + PIECE_SIDE) &&
+          wPArr[i]->getYValue() <= mouseY && 
+          mouseY <= (wPArr[i]->getYValue() + PIECE_SIDE)) {
+        currPiece = wPArr[i];
+      }
+    }
+    
+    for (int i = 0; i < CHESS_SIDE && currPiece == NULL; i++) {
+      if (bPiecesArr[i]->getXValue() <= mouseX && 
+          mouseX <= (bPiecesArr[i]->getXValue() + PIECE_SIDE) &&
+          bPiecesArr[i]->getYValue() <= mouseY && 
+          mouseY <= (bPiecesArr[i]->getYValue() + PIECE_SIDE)) {
+        currPiece = bPiecesArr[i];
+      }
+    }
+    
+    for (int i = 0; i < CHESS_SIDE && currPiece == NULL; i++) {
+      if (bPArr[i]->getXValue() <= mouseX && 
+          mouseX <= (bPArr[i]->getXValue() + PIECE_SIDE) &&
+          bPArr[i]->getYValue() <= mouseY && 
+          mouseY <= (bPArr[i]->getYValue() + PIECE_SIDE)) {
+        currPiece = bPArr[i];
+      }
+    }
+
     if (leftMBPressed && currPiece != NULL) {
       currPiece->setCoordinates(mouseX - PIECE_SIDE/2, mouseY - PIECE_SIDE/2);
     }
@@ -186,6 +222,7 @@ int main() {
     if (!leftMBPressed) {
       currPiece = NULL;
     }
+
 
     SDL_RenderPresent(renderer);
 
