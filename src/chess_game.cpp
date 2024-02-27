@@ -170,14 +170,26 @@ int main() {
 
     // Rendering white pieces
     for (int i = 0; i < CHESS_SIDE; i++) {
-      wPiecesArr[i]->render(renderer);
-      wPArr[i]->render(renderer);
+      if (wPiecesArr[i] != movePiece) {
+        wPiecesArr[i]->render(renderer);
+      }
+      if (wPArr[i] != movePiece) {
+        wPArr[i]->render(renderer);
+      }
     }
 
     // Rendering black pieces
     for (int i = 0; i < CHESS_SIDE; i++) {
-      bPiecesArr[i]->render(renderer);
-      bPArr[i]->render(renderer);
+      if (bPiecesArr[i] != movePiece) {
+        bPiecesArr[i]->render(renderer);
+      }
+      if (bPArr[i] != movePiece) {
+        bPArr[i]->render(renderer);
+      }
+    }
+
+    if (movePiece != NULL) {
+      movePiece->render(renderer);
     }
 
     /* LOGIC */ 
@@ -227,8 +239,6 @@ int main() {
 
     if (leftMBPressed && currPiece != NULL) {
       movePiece = currPiece;
-      // originalX = movePiece->getXValue();
-      // originalY = movePiece->getYValue();
       movePiece->setCoordinates(mouseX - PIECE_SIDE/2, mouseY - PIECE_SIDE/2);
     }
 
