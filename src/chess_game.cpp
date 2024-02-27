@@ -40,6 +40,7 @@ int main() {
   screen = SDL_GetWindowSurface(window);
 
   renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+  SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 
   /* CHESSBOARD */
   TexturedRect board(renderer, "../images/Chessboard2048.bmp");
@@ -129,9 +130,16 @@ int main() {
     bPArr.push_back(bP);
   }
 
+  SDL_Rect hoverRect;
+  hoverRect.x = 0;
+  hoverRect.y = 0;
+  hoverRect.w = PIECE_SIDE;
+  hoverRect.h = PIECE_SIDE;
+
   // Game loop
   bool gameRunning = true;
   bool leftMBPressed = false;
+  bool drawHoverRect = false;
   int mouseX;
   int mouseY;
   shared_ptr<TexturedRect> currPiece;
@@ -164,9 +172,18 @@ int main() {
 
     /* RENDERING */
     SDL_RenderClear(renderer);
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 150);
+
+    // SDL_RenderFillRect(renderer, &hoverRect);
     // Rendering the board
     board.render(renderer);
+
+    // SDL_RenderDrawRect(renderer, &hoverRect);
+    if (drawHoverRect) {
+      hoverRect.x = mouseX - (mouseX % SQUARE_SIDE);
+      hoverRect.y = mouseY - (mouseY % SQUARE_SIDE);
+      SDL_RenderFillRect(renderer, &hoverRect);
+    }
 
     // Rendering white pieces
     for (int i = 0; i < CHESS_SIDE; i++) {
@@ -240,6 +257,9 @@ int main() {
     if (leftMBPressed && currPiece != NULL) {
       movePiece = currPiece;
       movePiece->setCoordinates(mouseX - PIECE_SIDE/2, mouseY - PIECE_SIDE/2);
+      if (mouseX < 720) {
+        drawHoverRect = true;
+      }
     }
 
     if (!leftMBPressed) {
@@ -259,6 +279,7 @@ int main() {
       movePiece = NULL;
       originalX = 0;
       originalY = 0;
+      drawHoverRect = false;
     }
 
 
