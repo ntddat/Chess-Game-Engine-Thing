@@ -7,6 +7,7 @@
 #include <SDL2/SDL.h>
 
 #include "../include/textured_rect.hpp"
+#include "../include/piece.hpp"
 
 using namespace std;
 
@@ -47,86 +48,67 @@ int main() {
   board.setProperties(0, 0, 720, 720);
 
   /* WHITE PIECES */
-  // Array that stores the pieces
-  vector<shared_ptr<TexturedRect>> wPiecesArr;
+  // Array to store the pieces
+  vector<shared_ptr<Piece>> wPiecesArr;
   // King
-  shared_ptr<TexturedRect> wK = make_shared<TexturedRect>(renderer, "../images/wk.bmp");
-  wK->setProperties(4*SQUARE_SIDE, WHITE_PIECE_ROW, PIECE_SIDE, PIECE_SIDE);
+  shared_ptr<Piece> wK = make_shared<Piece>(renderer, "../images/wk.bmp", true, false, 4*SQUARE_SIDE);
   wPiecesArr.push_back(wK);
   // Queen
-  shared_ptr<TexturedRect> wQ = make_shared<TexturedRect>(renderer, "../images/wq.bmp");
-  wQ->setProperties(3*SQUARE_SIDE, WHITE_PIECE_ROW, PIECE_SIDE, PIECE_SIDE);
+  shared_ptr<Piece> wQ = make_shared<Piece>(renderer, "../images/wq.bmp", true, false, 3*SQUARE_SIDE);
   wPiecesArr.push_back(wQ);
   // Bishops
-  shared_ptr<TexturedRect> wB1 = make_shared<TexturedRect>(renderer, "../images/wb.bmp");
-  wB1->setProperties(2*SQUARE_SIDE, WHITE_PIECE_ROW, PIECE_SIDE, PIECE_SIDE);
+  shared_ptr<Piece> wB1 = make_shared<Piece>(renderer, "../images/wb.bmp", true, false, 2*SQUARE_SIDE);
   wPiecesArr.push_back(wB1);
-  shared_ptr<TexturedRect> wB2 = make_shared<TexturedRect>(renderer, "../images/wb.bmp");
-  wB2->setProperties(5*SQUARE_SIDE, WHITE_PIECE_ROW, PIECE_SIDE, PIECE_SIDE);
+  shared_ptr<Piece> wB2 = make_shared<Piece>(renderer, "../images/wb.bmp", true, false, 5*SQUARE_SIDE);
   wPiecesArr.push_back(wB2);
   // Knights
-  shared_ptr<TexturedRect> wN1 = make_shared<TexturedRect>(renderer, "../images/wn.bmp");
-  wN1->setProperties(SQUARE_SIDE, WHITE_PIECE_ROW, PIECE_SIDE, PIECE_SIDE);
+  shared_ptr<Piece> wN1 = make_shared<Piece>(renderer, "../images/wn.bmp", true, false, SQUARE_SIDE);
   wPiecesArr.push_back(wN1);
-  shared_ptr<TexturedRect> wN2 = make_shared<TexturedRect>(renderer, "../images/wn.bmp");
-  wN2->setProperties(6*SQUARE_SIDE, WHITE_PIECE_ROW, PIECE_SIDE, PIECE_SIDE);
+  shared_ptr<Piece> wN2 = make_shared<Piece>(renderer, "../images/wn.bmp", true, false, 6*SQUARE_SIDE);
   wPiecesArr.push_back(wN2);
   // Rooks
-  shared_ptr<TexturedRect> wR1 = make_shared<TexturedRect>(renderer, "../images/wr.bmp");
-  wR1->setProperties(0, WHITE_PIECE_ROW, PIECE_SIDE, PIECE_SIDE);
+  shared_ptr<Piece> wR1 = make_shared<Piece>(renderer, "../images/wr.bmp", true, false, 0);
   wPiecesArr.push_back(wR1);
-  shared_ptr<TexturedRect> wR2 = make_shared<TexturedRect>(renderer, "../images/wr.bmp");
-  wR2->setProperties(7*SQUARE_SIDE, WHITE_PIECE_ROW, PIECE_SIDE, PIECE_SIDE);
+  shared_ptr<Piece> wR2 = make_shared<Piece>(renderer, "../images/wr.bmp", true, false, 7*SQUARE_SIDE);
   wPiecesArr.push_back(wR2);
-
+  /* WHITE PIECES */
   // Array to store the pawns
-  vector<shared_ptr<TexturedRect>> wPArr;
+  vector<shared_ptr<Piece>> wPArr;
   // Pawns
   for (int i = 0; i < CHESS_SIDE; i++) {
-    shared_ptr<TexturedRect> wP = make_shared<TexturedRect>(renderer, "../images/wp.bmp");
-    wP->setProperties(i*SQUARE_SIDE, WHITE_PAWN_ROW, PIECE_SIDE, PIECE_SIDE);
+      shared_ptr<Piece> wP = make_shared<Piece>(renderer, "../images/wp.bmp", true, true, i*SQUARE_SIDE);
     wPArr.push_back(wP);
   }
 
   /* BLACK PIECES */
   // Array to store the pieces
-  vector<shared_ptr<TexturedRect>> bPiecesArr;
+  vector<shared_ptr<Piece>> bPiecesArr;
   // King
-  shared_ptr<TexturedRect> bK = make_shared<TexturedRect>(renderer, "../images/bk.bmp");
-  bK->setProperties(4*SQUARE_SIDE, BLACK_PIECE_ROW, PIECE_SIDE, PIECE_SIDE);
+  shared_ptr<Piece> bK = make_shared<Piece>(renderer, "../images/bk.bmp", false, false, 4*SQUARE_SIDE);
   bPiecesArr.push_back(bK);
   // Queen
-  shared_ptr<TexturedRect> bQ = make_shared<TexturedRect>(renderer, "../images/bq.bmp");
-  bQ->setProperties(3*SQUARE_SIDE, BLACK_PIECE_ROW, PIECE_SIDE, PIECE_SIDE);
+  shared_ptr<Piece> bQ = make_shared<Piece>(renderer, "../images/bq.bmp", false, false, 3*SQUARE_SIDE);
   bPiecesArr.push_back(bQ);
   // Bishops
-  shared_ptr<TexturedRect> bB1 = make_shared<TexturedRect>(renderer, "../images/bb.bmp");
-  bB1->setProperties(2*SQUARE_SIDE, BLACK_PIECE_ROW, PIECE_SIDE, PIECE_SIDE);
+  shared_ptr<Piece> bB1 = make_shared<Piece>(renderer, "../images/bb.bmp", false, false, 2*SQUARE_SIDE);
   bPiecesArr.push_back(bB1);
-  shared_ptr<TexturedRect> bB2 = make_shared<TexturedRect>(renderer, "../images/bb.bmp");
-  bB2->setProperties(5*SQUARE_SIDE, BLACK_PIECE_ROW, PIECE_SIDE, PIECE_SIDE);
+  shared_ptr<Piece> bB2 = make_shared<Piece>(renderer, "../images/bb.bmp", false, false, 5*SQUARE_SIDE);
   bPiecesArr.push_back(bB2);
   // Knights
-  shared_ptr<TexturedRect> bN1 = make_shared<TexturedRect>(renderer, "../images/bn.bmp");
-  bN1->setProperties(SQUARE_SIDE, BLACK_PIECE_ROW, PIECE_SIDE, PIECE_SIDE);
+  shared_ptr<Piece> bN1 = make_shared<Piece>(renderer, "../images/bn.bmp", false, false, SQUARE_SIDE);
   bPiecesArr.push_back(bN1);
-  shared_ptr<TexturedRect> bN2 = make_shared<TexturedRect>(renderer, "../images/bn.bmp");
-  bN2->setProperties(6*SQUARE_SIDE, BLACK_PIECE_ROW, PIECE_SIDE, PIECE_SIDE);
+  shared_ptr<Piece> bN2 = make_shared<Piece>(renderer, "../images/bn.bmp", false, false, 6*SQUARE_SIDE);
   bPiecesArr.push_back(bN2);
   // Rooks
-  shared_ptr<TexturedRect> bR1 = make_shared<TexturedRect>(renderer, "../images/br.bmp");
-  bR1->setProperties(0, BLACK_PIECE_ROW, PIECE_SIDE, PIECE_SIDE);
+  shared_ptr<Piece> bR1 = make_shared<Piece>(renderer, "../images/br.bmp", false, false, 0);
   bPiecesArr.push_back(bR1);
-  shared_ptr<TexturedRect> bR2 = make_shared<TexturedRect>(renderer, "../images/br.bmp");
-  bR2->setProperties(7*SQUARE_SIDE, BLACK_PIECE_ROW, PIECE_SIDE, PIECE_SIDE);
+  shared_ptr<Piece> bR2 = make_shared<Piece>(renderer, "../images/br.bmp", false, false, 7*SQUARE_SIDE);
   bPiecesArr.push_back(bR2);
-
   // Array to store the pawns
-  vector<shared_ptr<TexturedRect>> bPArr;
+  vector<shared_ptr<Piece>> bPArr;
   // Pawns
   for (int i = 0; i < CHESS_SIDE; i++) {
-    shared_ptr<TexturedRect> bP = make_shared<TexturedRect>(renderer, "../images/bp.bmp");
-    bP->setProperties(i*SQUARE_SIDE, BLACK_PAWN_ROW, PIECE_SIDE, PIECE_SIDE);
+    shared_ptr<Piece> bP = make_shared<Piece>(renderer, "../images/bp.bmp", false, true, i*SQUARE_SIDE);
     bPArr.push_back(bP);
   }
 
@@ -142,14 +124,11 @@ int main() {
   bool drawHoverRect = false;
   int mouseX;
   int mouseY;
-  shared_ptr<TexturedRect> currPiece;
-  shared_ptr<TexturedRect> movePiece;
+  shared_ptr<Piece> currPiece;
+  shared_ptr<Piece> movePiece;
   int originalX, originalY;
   while (gameRunning) {
     SDL_GetMouseState(&mouseX, &mouseY);
-    // if (mouseX > 720) {
-      // leftMBPressed = false;
-    // }
 
     /* EVENT HANDLING */
     SDL_Event event;
@@ -174,11 +153,9 @@ int main() {
     SDL_RenderClear(renderer);
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 150);
 
-    // SDL_RenderFillRect(renderer, &hoverRect);
     // Rendering the board
     board.render(renderer);
 
-    // SDL_RenderDrawRect(renderer, &hoverRect);
     if (drawHoverRect) {
       hoverRect.x = mouseX - (mouseX % SQUARE_SIDE);
       hoverRect.y = mouseY - (mouseY % SQUARE_SIDE);
@@ -188,75 +165,75 @@ int main() {
     // Rendering white pieces
     for (int i = 0; i < CHESS_SIDE; i++) {
       if (wPiecesArr[i] != movePiece) {
-        wPiecesArr[i]->render(renderer);
+        wPiecesArr[i]->getTRect()->render(renderer);
       }
       if (wPArr[i] != movePiece) {
-        wPArr[i]->render(renderer);
+        wPArr[i]->getTRect()->render(renderer);
       }
     }
 
     // Rendering black pieces
     for (int i = 0; i < CHESS_SIDE; i++) {
       if (bPiecesArr[i] != movePiece) {
-        bPiecesArr[i]->render(renderer);
+        bPiecesArr[i]->getTRect()->render(renderer);
       }
       if (bPArr[i] != movePiece) {
-        bPArr[i]->render(renderer);
+        bPArr[i]->getTRect()->render(renderer);
       }
     }
 
     if (movePiece != NULL) {
-      movePiece->render(renderer);
+      movePiece->getTRect()->render(renderer);
     }
 
     /* LOGIC */ 
-    for (int i = 0; i < CHESS_SIDE && currPiece == NULL; i++) {
-      if (wPiecesArr[i]->getXValue() <= mouseX && 
-          mouseX <= (wPiecesArr[i]->getXValue() + PIECE_SIDE) &&
-          wPiecesArr[i]->getYValue() <= mouseY && 
-          mouseY <= (wPiecesArr[i]->getYValue() + PIECE_SIDE)) {
+    for (int i = 0; i < CHESS_SIDE - 1 && currPiece == NULL; i++) {
+      if (wPiecesArr[i]->getTRect()->getXValue() <= mouseX && 
+          mouseX <= (wPiecesArr[i]->getTRect()->getXValue() + PIECE_SIDE) &&
+          wPiecesArr[i]->getTRect()->getYValue() <= mouseY && 
+          mouseY <= (wPiecesArr[i]->getTRect()->getYValue() + PIECE_SIDE)) {
         currPiece = wPiecesArr[i];
-        originalX = currPiece->getXValue();
-        originalY = currPiece->getYValue();
+        originalX = currPiece->getTRect()->getXValue();
+        originalY = currPiece->getTRect()->getYValue();
       }
     }
-    
+
     for (int i = 0; i < CHESS_SIDE && currPiece == NULL; i++) {
-      if (wPArr[i]->getXValue() <= mouseX && 
-          mouseX <= (wPArr[i]->getXValue() + PIECE_SIDE) &&
-          wPArr[i]->getYValue() <= mouseY && 
-          mouseY <= (wPArr[i]->getYValue() + PIECE_SIDE)) {
+      if (wPArr[i]->getTRect()->getXValue() <= mouseX && 
+          mouseX <= (wPArr[i]->getTRect()->getXValue() + PIECE_SIDE) &&
+          wPArr[i]->getTRect()->getYValue() <= mouseY && 
+          mouseY <= (wPArr[i]->getTRect()->getYValue() + PIECE_SIDE)) {
         currPiece = wPArr[i];
-        originalX = currPiece->getXValue();
-        originalY = currPiece->getYValue();
+        originalX = currPiece->getTRect()->getXValue();
+        originalY = currPiece->getTRect()->getYValue();
       }
     }
     
     for (int i = 0; i < CHESS_SIDE && currPiece == NULL; i++) {
-      if (bPiecesArr[i]->getXValue() <= mouseX && 
-          mouseX <= (bPiecesArr[i]->getXValue() + PIECE_SIDE) &&
-          bPiecesArr[i]->getYValue() <= mouseY && 
-          mouseY <= (bPiecesArr[i]->getYValue() + PIECE_SIDE)) {
+      if (bPiecesArr[i]->getTRect()->getXValue() <= mouseX && 
+          mouseX <= (bPiecesArr[i]->getTRect()->getXValue() + PIECE_SIDE) &&
+          bPiecesArr[i]->getTRect()->getYValue() <= mouseY && 
+          mouseY <= (bPiecesArr[i]->getTRect()->getYValue() + PIECE_SIDE)) {
         currPiece = bPiecesArr[i];
-        originalX = currPiece->getXValue();
-        originalY = currPiece->getYValue();
+        originalX = currPiece->getTRect()->getXValue();
+        originalY = currPiece->getTRect()->getYValue();
       }
     }
     
     for (int i = 0; i < CHESS_SIDE && currPiece == NULL; i++) {
-      if (bPArr[i]->getXValue() <= mouseX && 
-          mouseX <= (bPArr[i]->getXValue() + PIECE_SIDE) &&
-          bPArr[i]->getYValue() <= mouseY && 
-          mouseY <= (bPArr[i]->getYValue() + PIECE_SIDE)) {
+      if (bPArr[i]->getTRect()->getXValue() <= mouseX && 
+          mouseX <= (bPArr[i]->getTRect()->getXValue() + PIECE_SIDE) &&
+          bPArr[i]->getTRect()->getYValue() <= mouseY && 
+          mouseY <= (bPArr[i]->getTRect()->getYValue() + PIECE_SIDE)) {
         currPiece = bPArr[i];
-        originalX = currPiece->getXValue();
-        originalY = currPiece->getYValue();
+        originalX = currPiece->getTRect()->getXValue();
+        originalY = currPiece->getTRect()->getYValue();
       }
     }
 
     if (leftMBPressed && currPiece != NULL) {
       movePiece = currPiece;
-      movePiece->setCoordinates(mouseX - PIECE_SIDE/2, mouseY - PIECE_SIDE/2);
+      movePiece->getTRect()->setCoordinates(mouseX - PIECE_SIDE/2, mouseY - PIECE_SIDE/2);
       if (mouseX < 720) {
         drawHoverRect = true;
       }
@@ -273,7 +250,7 @@ int main() {
           squareX = originalX;
           squareY = originalY;
         }
-        movePiece->setCoordinates(squareX, squareY);
+        movePiece->getTRect()->setCoordinates(squareX, squareY);
       }
       currPiece = NULL;
       movePiece = NULL;
