@@ -6,7 +6,15 @@
 #include <memory>
 #include <SDL2/SDL.h>
 
+// #pragma once
+
 #include "../include/textured_rect.hpp"
+#include "../include/pawn.hpp"
+#include "../include/knight.hpp"
+#include "../include/bishop.hpp"
+#include "../include/rook.hpp"
+#include "../include/queen.hpp"
+#include "../include/king.hpp"
 #include "../include/piece.hpp"
 
 using namespace std;
@@ -19,6 +27,22 @@ using namespace std;
 #define WHITE_PIECE_ROW 630
 #define BLACK_PAWN_ROW 90
 #define BLACK_PIECE_ROW 0
+
+/*
+ empty = 0
+ pawn = 1, knight = 2, bishop = 3, rook = 4, queen = 5, king = 6
+ black pieces are negative
+ int state[8][8] = {
+ {-4, -2, -3, -5, -6, -3, -2, -4}
+ {-1, -1, -1, -1, -1, -1, -1, -1}
+ {0, 0, 0, 0, 0, 0, 0, 0}
+ {0, 0, 0, 0, 0, 0, 0, 0}
+ {0, 0, 0, 0, 0, 0, 0, 0}
+ {0, 0, 0, 0, 0, 0, 0, 0}
+ {1, 1, 1, 1, 1, 1, 1, 1}
+ {4, 2, 3, 5, 6, 3, 2, 4}
+ } 
+ */
 
 int main() {
   SDL_Window *window;
@@ -51,32 +75,32 @@ int main() {
   // Array to store the pieces
   vector<shared_ptr<Piece>> wPiecesArr;
   // King
-  shared_ptr<Piece> wK = make_shared<Piece>(renderer, "../images/wk.bmp", true, false, 4*SQUARE_SIDE);
+  shared_ptr<Piece> wK = make_shared<King>(renderer, "../images/wk.bmp", true, false, 4, 7);
   wPiecesArr.push_back(wK);
   // Queen
-  shared_ptr<Piece> wQ = make_shared<Piece>(renderer, "../images/wq.bmp", true, false, 3*SQUARE_SIDE);
+  shared_ptr<Piece> wQ = make_shared<Queen>(renderer, "../images/wq.bmp", true, false, 3, 7);
   wPiecesArr.push_back(wQ);
   // Bishops
-  shared_ptr<Piece> wB1 = make_shared<Piece>(renderer, "../images/wb.bmp", true, false, 2*SQUARE_SIDE);
+  shared_ptr<Piece> wB1 = make_shared<Bishop>(renderer, "../images/wb.bmp", true, false, 2, 7);
   wPiecesArr.push_back(wB1);
-  shared_ptr<Piece> wB2 = make_shared<Piece>(renderer, "../images/wb.bmp", true, false, 5*SQUARE_SIDE);
+  shared_ptr<Piece> wB2 = make_shared<Bishop>(renderer, "../images/wb.bmp", true, false, 5, 7);
   wPiecesArr.push_back(wB2);
   // Knights
-  shared_ptr<Piece> wN1 = make_shared<Piece>(renderer, "../images/wn.bmp", true, false, SQUARE_SIDE);
+  shared_ptr<Piece> wN1 = make_shared<Knight>(renderer, "../images/wn.bmp", true, false, 1, 7);
   wPiecesArr.push_back(wN1);
-  shared_ptr<Piece> wN2 = make_shared<Piece>(renderer, "../images/wn.bmp", true, false, 6*SQUARE_SIDE);
+  shared_ptr<Piece> wN2 = make_shared<Knight>(renderer, "../images/wn.bmp", true, false, 6, 7);
   wPiecesArr.push_back(wN2);
   // Rooks
-  shared_ptr<Piece> wR1 = make_shared<Piece>(renderer, "../images/wr.bmp", true, false, 0);
+  shared_ptr<Piece> wR1 = make_shared<Rook>(renderer, "../images/wr.bmp", true, false, 0, 7);
   wPiecesArr.push_back(wR1);
-  shared_ptr<Piece> wR2 = make_shared<Piece>(renderer, "../images/wr.bmp", true, false, 7*SQUARE_SIDE);
+  shared_ptr<Piece> wR2 = make_shared<Rook>(renderer, "../images/wr.bmp", true, false, 7, 7);
   wPiecesArr.push_back(wR2);
   /* WHITE PIECES */
   // Array to store the pawns
   vector<shared_ptr<Piece>> wPArr;
   // Pawns
   for (int i = 0; i < CHESS_SIDE; i++) {
-      shared_ptr<Piece> wP = make_shared<Piece>(renderer, "../images/wp.bmp", true, true, i*SQUARE_SIDE);
+    shared_ptr<Piece> wP = make_shared<Pawn>(renderer, "../images/wp.bmp", true, true, i, 6);
     wPArr.push_back(wP);
   }
 
@@ -84,31 +108,31 @@ int main() {
   // Array to store the pieces
   vector<shared_ptr<Piece>> bPiecesArr;
   // King
-  shared_ptr<Piece> bK = make_shared<Piece>(renderer, "../images/bk.bmp", false, false, 4*SQUARE_SIDE);
+  shared_ptr<Piece> bK = make_shared<King>(renderer, "../images/bk.bmp", false, false, 4, 0);
   bPiecesArr.push_back(bK);
   // Queen
-  shared_ptr<Piece> bQ = make_shared<Piece>(renderer, "../images/bq.bmp", false, false, 3*SQUARE_SIDE);
+  shared_ptr<Piece> bQ = make_shared<Queen>(renderer, "../images/bq.bmp", false, false, 3, 0);
   bPiecesArr.push_back(bQ);
   // Bishops
-  shared_ptr<Piece> bB1 = make_shared<Piece>(renderer, "../images/bb.bmp", false, false, 2*SQUARE_SIDE);
+  shared_ptr<Piece> bB1 = make_shared<Bishop>(renderer, "../images/bb.bmp", false, false, 2, 0);
   bPiecesArr.push_back(bB1);
-  shared_ptr<Piece> bB2 = make_shared<Piece>(renderer, "../images/bb.bmp", false, false, 5*SQUARE_SIDE);
+  shared_ptr<Piece> bB2 = make_shared<Bishop>(renderer, "../images/bb.bmp", false, false, 5, 0);
   bPiecesArr.push_back(bB2);
   // Knights
-  shared_ptr<Piece> bN1 = make_shared<Piece>(renderer, "../images/bn.bmp", false, false, SQUARE_SIDE);
+  shared_ptr<Piece> bN1 = make_shared<Knight>(renderer, "../images/bn.bmp", false, false, 1, 0);
   bPiecesArr.push_back(bN1);
-  shared_ptr<Piece> bN2 = make_shared<Piece>(renderer, "../images/bn.bmp", false, false, 6*SQUARE_SIDE);
+  shared_ptr<Piece> bN2 = make_shared<Knight>(renderer, "../images/bn.bmp", false, false, 6, 0);
   bPiecesArr.push_back(bN2);
   // Rooks
-  shared_ptr<Piece> bR1 = make_shared<Piece>(renderer, "../images/br.bmp", false, false, 0);
+  shared_ptr<Piece> bR1 = make_shared<Rook>(renderer, "../images/br.bmp", false, false, 0, 0);
   bPiecesArr.push_back(bR1);
-  shared_ptr<Piece> bR2 = make_shared<Piece>(renderer, "../images/br.bmp", false, false, 7*SQUARE_SIDE);
+  shared_ptr<Piece> bR2 = make_shared<Rook>(renderer, "../images/br.bmp", false, false, 7, 0);
   bPiecesArr.push_back(bR2);
   // Array to store the pawns
   vector<shared_ptr<Piece>> bPArr;
   // Pawns
   for (int i = 0; i < CHESS_SIDE; i++) {
-    shared_ptr<Piece> bP = make_shared<Piece>(renderer, "../images/bp.bmp", false, true, i*SQUARE_SIDE);
+    shared_ptr<Piece> bP = make_shared<Pawn>(renderer, "../images/bp.bmp", false, true, i, 1);
     bPArr.push_back(bP);
   }
 
@@ -258,7 +282,6 @@ int main() {
       originalY = 0;
       drawHoverRect = false;
     }
-
 
     SDL_RenderPresent(renderer);
 

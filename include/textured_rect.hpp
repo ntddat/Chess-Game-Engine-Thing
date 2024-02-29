@@ -1,3 +1,6 @@
+#ifndef TEXTURED_RECT_H
+#define TEXTURED_RECT_H
+
 #include <string>
 #include <SDL2/SDL.h>
 
@@ -28,3 +31,5 @@ class TexturedRect {
     // Render the texture
     void render(SDL_Renderer *&renderer);
 };
+
+#endif

@@ -13,24 +13,22 @@ using namespace std;
 #define BLACK_PAWN_ROW 90
 #define BLACK_PIECE_ROW 0
 
-Piece::Piece(SDL_Renderer *&renderer, string imagePath, bool color, bool pawn,  int initX) {
+Piece::Piece(SDL_Renderer *&renderer, string imagePath, bool color, bool pawn, int initX, int initY) {
   tRect = make_shared<TexturedRect>(renderer, imagePath);
-  int initY;
-  if (color) {
-    if (pawn) initY = WHITE_PAWN_ROW;
-    else initY = WHITE_PIECE_ROW;
-  }
-  else {
-    if (pawn) initY = BLACK_PAWN_ROW;
-    else initY = BLACK_PIECE_ROW;
-  }
-  tRect->setProperties(initX, initY, PIECE_SIDE, PIECE_SIDE);
+  tRect->setProperties(initX * PIECE_SIDE, initY * PIECE_SIDE, PIECE_SIDE, PIECE_SIDE);
   isWhite = color;
   isPawn = pawn;
+  squareX = initX;
+  squareY = initY;
 }
 
 Piece::~Piece() {
 
+}
+
+void Piece::setSquareXY(int newSquareX, int newSquareY) {
+  squareX = newSquareX;
+  squareY = newSquareY;
 }
 
 shared_ptr<TexturedRect> Piece::getTRect() {
