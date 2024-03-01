@@ -1,5 +1,7 @@
 #include <string>
 #include <memory>
+#include <vector>
+#include <tuple>
 #include <SDL2/SDL.h>
 
 #include "../include/textured_rect.hpp"
@@ -31,6 +33,37 @@ void Piece::setSquareXY(int newSquareX, int newSquareY) {
   squareY = newSquareY;
 }
 
+void Piece::setHasMoved(bool value) {
+
+}
+
+void Piece::setIsAlive(bool value) {
+  isAlive = value;
+}
+
+bool Piece::getHasMoved() {
+
+}
+
+bool Piece::getIsAlive() {
+  return isAlive;
+}
+
 shared_ptr<TexturedRect> Piece::getTRect() {
   return tRect;
 }
+
+int Piece::getSquareX() {
+  return squareX;
+}
+
+int Piece::getSquareY() {
+  return squareY;
+}
+
+vector<tuple<int, int>> Piece::getValidSquares(int state[8][8]) {
+
+}
+// bool Piece::makeMove(int mouseX, int mouseY, int state[8][8]) {
+//
+// }

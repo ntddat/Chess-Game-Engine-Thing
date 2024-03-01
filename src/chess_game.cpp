@@ -4,6 +4,7 @@
 #include <iostream>
 #include <vector>
 #include <memory>
+#include <vector>
 #include <SDL2/SDL.h>
 
 // #pragma once
@@ -28,6 +29,17 @@ using namespace std;
 #define BLACK_PAWN_ROW 90
 #define BLACK_PIECE_ROW 0
 
+#define EMPTY 0
+#define PAWN 1
+#define KNIGHT 2  
+#define BISHOP 3
+#define ROOK 4
+#define QUEEN 5 
+#define KING 6
+
+#define BLACK -1
+#define WHITE 1
+
 /*
  empty = 0
  pawn = 1, knight = 2, bishop = 3, rook = 4, queen = 5, king = 6
@@ -43,6 +55,9 @@ using namespace std;
  {4, 2, 3, 5, 6, 3, 2, 4}
  } 
  */
+
+bool makeMove(int mouseX, int mouseY, int state[CHESS_SIDE][CHESS_SIDE], shared_ptr<Piece> movePiece, int *capturedX, int *capturedY, int *capturedPiece);
+void capturePiece(int capturedX, int capturedY, vector<shared_ptr<Piece>> arr);
 
 int main() {
   SDL_Window *window;
@@ -66,6 +81,17 @@ int main() {
 
   renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
   SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+
+  int state[CHESS_SIDE][CHESS_SIDE] = {
+    {BLACK*ROOK, BLACK*KNIGHT, BLACK*BISHOP, BLACK*QUEEN, BLACK*KING, BLACK*BISHOP, BLACK*KNIGHT, BLACK*ROOK},
+    {BLACK*PAWN, BLACK*PAWN, BLACK*PAWN, BLACK*PAWN, BLACK*PAWN, BLACK*PAWN, BLACK*PAWN, BLACK*PAWN},
+    {EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY},
+    {EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY},
+    {EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY},
+    {EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY},
+    {WHITE*PAWN, WHITE*PAWN, WHITE*PAWN, WHITE*PAWN, WHITE*PAWN, WHITE*PAWN, WHITE*PAWN, WHITE*PAWN},
+    {WHITE*ROOK, WHITE*KNIGHT, WHITE*BISHOP, WHITE*QUEEN, WHITE*KING, WHITE*BISHOP, WHITE*KNIGHT, WHITE*ROOK}
+  };
 
   /* CHESSBOARD */
   TexturedRect board(renderer, "../images/Chessboard2048.bmp");
@@ -188,20 +214,24 @@ int main() {
 
     // Rendering white pieces
     for (int i = 0; i < CHESS_SIDE; i++) {
-      if (wPiecesArr[i] != movePiece) {
+      if (wPiecesArr[i]->getIsAlive() &&
+          wPiecesArr[i] != movePiece) {
         wPiecesArr[i]->getTRect()->render(renderer);
       }
-      if (wPArr[i] != movePiece) {
+      if (wPArr[i]->getIsAlive() &&
+          wPArr[i] != movePiece) {
         wPArr[i]->getTRect()->render(renderer);
       }
     }
 
     // Rendering black pieces
     for (int i = 0; i < CHESS_SIDE; i++) {
-      if (bPiecesArr[i] != movePiece) {
+      if (bPiecesArr[i]->getIsAlive() &&
+          bPiecesArr[i] != movePiece) {
         bPiecesArr[i]->getTRect()->render(renderer);
       }
-      if (bPArr[i] != movePiece) {
+      if (bPArr[i]->getIsAlive() &&
+          bPArr[i] != movePiece) {
         bPArr[i]->getTRect()->render(renderer);
       }
     }
@@ -211,8 +241,9 @@ int main() {
     }
 
     /* LOGIC */ 
-    for (int i = 0; i < CHESS_SIDE - 1 && currPiece == NULL; i++) {
-      if (wPiecesArr[i]->getTRect()->getXValue() <= mouseX && 
+    for (int i = 0; i < CHESS_SIDE && currPiece == NULL; i++) {
+      if (wPiecesArr[i]->getIsAlive() &&
+          wPiecesArr[i]->getTRect()->getXValue() <= mouseX && 
           mouseX <= (wPiecesArr[i]->getTRect()->getXValue() + PIECE_SIDE) &&
           wPiecesArr[i]->getTRect()->getYValue() <= mouseY && 
           mouseY <= (wPiecesArr[i]->getTRect()->getYValue() + PIECE_SIDE)) {
@@ -223,7 +254,8 @@ int main() {
     }
 
     for (int i = 0; i < CHESS_SIDE && currPiece == NULL; i++) {
-      if (wPArr[i]->getTRect()->getXValue() <= mouseX && 
+      if (wPArr[i]->getIsAlive() &&
+          wPArr[i]->getTRect()->getXValue() <= mouseX && 
           mouseX <= (wPArr[i]->getTRect()->getXValue() + PIECE_SIDE) &&
           wPArr[i]->getTRect()->getYValue() <= mouseY && 
           mouseY <= (wPArr[i]->getTRect()->getYValue() + PIECE_SIDE)) {
@@ -234,7 +266,8 @@ int main() {
     }
     
     for (int i = 0; i < CHESS_SIDE && currPiece == NULL; i++) {
-      if (bPiecesArr[i]->getTRect()->getXValue() <= mouseX && 
+      if (bPiecesArr[i]->getIsAlive() &&
+          bPiecesArr[i]->getTRect()->getXValue() <= mouseX && 
           mouseX <= (bPiecesArr[i]->getTRect()->getXValue() + PIECE_SIDE) &&
           bPiecesArr[i]->getTRect()->getYValue() <= mouseY && 
           mouseY <= (bPiecesArr[i]->getTRect()->getYValue() + PIECE_SIDE)) {
@@ -245,7 +278,8 @@ int main() {
     }
     
     for (int i = 0; i < CHESS_SIDE && currPiece == NULL; i++) {
-      if (bPArr[i]->getTRect()->getXValue() <= mouseX && 
+      if (bPArr[i]->getIsAlive() &&
+          bPArr[i]->getTRect()->getXValue() <= mouseX && 
           mouseX <= (bPArr[i]->getTRect()->getXValue() + PIECE_SIDE) &&
           bPArr[i]->getTRect()->getYValue() <= mouseY && 
           mouseY <= (bPArr[i]->getTRect()->getYValue() + PIECE_SIDE)) {
@@ -264,22 +298,48 @@ int main() {
     }
 
     if (!leftMBPressed) {
+        int capturedX = -1;
+        int capturedY = -1;
+        int capturedPiece = EMPTY;
       if (movePiece != NULL) {
-        int squareX, squareY;
-        if (mouseX < 720) {
-          squareX = mouseX - (mouseX % SQUARE_SIDE);
-          squareY = mouseY - (mouseY % SQUARE_SIDE);
+        int newX, newY;
+        // bool check = movePiece->makeMove(mouseX, mouseY, state);
+        // cout << check << endl;
+        if (mouseX < 720 && makeMove(mouseX, mouseY, state, movePiece, &capturedX, &capturedY, &capturedPiece)) {
+          newX = mouseX - (mouseX % SQUARE_SIDE);
+          newY = mouseY - (mouseY % SQUARE_SIDE);
+          if (capturedX != -1 && capturedY != -1 & capturedPiece != EMPTY) {
+            if (capturedPiece < EMPTY) {
+              if (abs(capturedPiece) == PAWN) {
+                capturePiece(capturedX, capturedY, bPArr);
+              }
+              else {
+                capturePiece(capturedX, capturedY, bPiecesArr);
+              }
+            }
+            else {
+              if (abs(capturedPiece) == PAWN) {
+                capturePiece(capturedX, capturedY, wPArr);
+              }
+              else {
+                capturePiece(capturedX, capturedY, wPiecesArr);
+              }
+            }
+          }
         }
         else {
-          squareX = originalX;
-          squareY = originalY;
+          newX = originalX;
+          newY = originalY;
         }
-        movePiece->getTRect()->setCoordinates(squareX, squareY);
+        movePiece->getTRect()->setCoordinates(newX, newY);
       }
       currPiece = NULL;
       movePiece = NULL;
       originalX = 0;
       originalY = 0;
+      capturedX = -1;
+      capturedY = -1;
+      capturedPiece = EMPTY;
       drawHoverRect = false;
     }
 
@@ -289,4 +349,49 @@ int main() {
 
   SDL_DestroyWindow(window);
   SDL_Quit();
+}
+
+bool makeMove(int mouseX, int mouseY, int state[CHESS_SIDE][CHESS_SIDE], shared_ptr<Piece> movePiece, int *capturedX, int *capturedY, int *capturedPiece) {
+  vector<tuple<int, int>> validSquares = movePiece->getValidSquares(state);
+  for (int i = 0; i < validSquares.size(); i++) {
+    int currX = get<0>(validSquares[i])*SQUARE_SIDE;
+    int currY = get<1>(validSquares[i])*SQUARE_SIDE;
+    if (currX <= mouseX && mouseX <= currX + SQUARE_SIDE &&
+        currY <= mouseY && mouseY <= currY + SQUARE_SIDE) {
+      if (abs(state[movePiece->getSquareY()][movePiece->getSquareX()]) == PAWN ||
+          abs(state[movePiece->getSquareY()][movePiece->getSquareX()]) == KING ||
+          abs(state[movePiece->getSquareY()][movePiece->getSquareX()]) == ROOK) {
+        if (!movePiece->getHasMoved()) {movePiece->setHasMoved(true);}
+      }
+
+      // If the piece just moved
+      if (state[get<1>(validSquares[i])][get<0>(validSquares[i])] == EMPTY) {
+        int temp = state[get<1>(validSquares[i])][get<0>(validSquares[i])];
+        state[get<1>(validSquares[i])][get<0>(validSquares[i])] = state[movePiece->getSquareY()][movePiece->getSquareX()];
+        state[movePiece->getSquareY()][movePiece->getSquareX()] = temp;
+      }
+
+      // If the piece just captured
+      else {
+        *capturedPiece = state[get<1>(validSquares[i])][get<0>(validSquares[i])];
+        state[get<1>(validSquares[i])][get<0>(validSquares[i])] = state[movePiece->getSquareY()][movePiece->getSquareX()];
+        state[movePiece->getSquareY()][movePiece->getSquareX()] = EMPTY;
+        *capturedX = get<0>(validSquares[i]);
+        *capturedY = get<1>(validSquares[i]);
+      }
+
+      movePiece->setSquareXY(get<0>(validSquares[i]), get<1>(validSquares[i]));
+      return true;
+    }
+  }
+  return false;
+}
+
+void capturePiece(int capturedX, int capturedY, vector<shared_ptr<Piece>> arr) {
+  for (int i = 0; i < CHESS_SIDE; i++) {
+    if (arr[i]->getIsAlive() && capturedX == arr[i]->getSquareX()
+        && capturedY == arr[i]->getSquareY()) {
+      arr[i]->setIsAlive(false);
+    } 
+  }
 }
