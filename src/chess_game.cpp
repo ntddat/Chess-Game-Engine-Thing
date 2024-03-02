@@ -40,6 +40,9 @@ using namespace std;
 #define BLACK -1
 #define WHITE 1
 
+#define CASTLE_LONG -20
+#define CASTLE_SHORT -30
+
 /*
  empty = 0
  pawn = 1, knight = 2, bishop = 3, rook = 4, queen = 5, king = 6
@@ -309,6 +312,7 @@ int main() {
           newX = mouseX - (mouseX % SQUARE_SIDE);
           newY = mouseY - (mouseY % SQUARE_SIDE);
           if (capturedX != -1 && capturedY != -1 & capturedPiece != EMPTY) {
+            // Disable a piece if it was captured
             if (capturedPiece < EMPTY) {
               if (abs(capturedPiece) == PAWN) {
                 capturePiece(capturedX, capturedY, bPArr);
@@ -326,6 +330,58 @@ int main() {
               }
             }
           }
+          // Disable castling if a rook just moved
+          if (abs(state[movePiece->getSquareY()][movePiece->getSquareX()]) == ROOK) {
+            if (movePiece == wR1) {
+              wK->setCastleQ(false);
+            }
+            if (movePiece == wR2) {
+              wK->setCastleK(false);
+            }
+            if (movePiece == bR1) {
+              bK->setCastleQ(false);
+            }
+            if (movePiece == bR2) {
+              bK->setCastleK(false);
+            }
+          }
+          // Moving the rook after castling
+          if (abs(state[movePiece->getSquareY()][movePiece->getSquareX()]) == KING &&
+              capturedX != -1 && capturedY == -1 && capturedPiece == EMPTY) {
+            if (capturedX == CASTLE_SHORT) {
+              if (state[movePiece->getSquareY()][movePiece->getSquareX()] > EMPTY) {
+                state[wR2->getSquareY()][wR2->getSquareX()] = EMPTY;
+                state[wR2->getSquareY()][wR2->getSquareX() - 2] = WHITE*ROOK;
+                wR2->setSquareXY(wR2->getSquareX() - 2, wR2->getSquareY());
+                wR2->getTRect()->setCoordinates(wR2->getSquareX()*SQUARE_SIDE,
+                                                wR2->getSquareY()*SQUARE_SIDE);
+              } 
+              else {
+                state[bR2->getSquareY()][bR2->getSquareX()] = EMPTY;
+                state[bR2->getSquareY()][bR2->getSquareX() - 2] = BLACK*ROOK;
+                bR2->setSquareXY(bR2->getSquareX() - 2, bR2->getSquareY());
+                bR2->getTRect()->setCoordinates(bR2->getSquareX()*SQUARE_SIDE,
+                                                bR2->getSquareY()*SQUARE_SIDE);
+              }
+            }
+            else if (capturedX == CASTLE_LONG) {
+              if (state[movePiece->getSquareY()][movePiece->getSquareX()] > EMPTY) {
+                state[wR1->getSquareY()][wR1->getSquareX()] = EMPTY;
+                state[wR1->getSquareY()][wR1->getSquareX() + 3] = WHITE*ROOK;
+                wR1->setSquareXY(wR1->getSquareX() + 3, wR1->getSquareY());
+                wR1->getTRect()->setCoordinates(wR1->getSquareX()*SQUARE_SIDE,
+                                                wR1->getSquareY()*SQUARE_SIDE);
+              } 
+              else {
+                state[bR1->getSquareY()][bR1->getSquareX()] = EMPTY;
+                state[bR1->getSquareY()][bR1->getSquareX() + 3] = BLACK*ROOK;
+                bR1->setSquareXY(bR1->getSquareX() + 3, bR1->getSquareY());
+                bR1->getTRect()->setCoordinates(bR1->getSquareX()*SQUARE_SIDE,
+                                                bR1->getSquareY()*SQUARE_SIDE);
+              }
+            }
+          } 
+          
         }
         else {
           newX = originalX;
@@ -358,20 +414,32 @@ bool makeMove(int mouseX, int mouseY, int state[CHESS_SIDE][CHESS_SIDE], shared_
     int currY = get<1>(validSquares[i])*SQUARE_SIDE;
     if (currX <= mouseX && mouseX <= currX + SQUARE_SIDE &&
         currY <= mouseY && mouseY <= currY + SQUARE_SIDE) {
-      if (abs(state[movePiece->getSquareY()][movePiece->getSquareX()]) == PAWN ||
-          abs(state[movePiece->getSquareY()][movePiece->getSquareX()]) == KING ||
-          abs(state[movePiece->getSquareY()][movePiece->getSquareX()]) == ROOK) {
+      if (abs(state[movePiece->getSquareY()][movePiece->getSquareX()]) == PAWN) {
         if (!movePiece->getHasMoved()) {movePiece->setHasMoved(true);}
       }
+      if (abs(state[movePiece->getSquareY()][movePiece->getSquareX()]) == KING) {
+        if (movePiece->getCastleK()) {movePiece->setCastleK(false);}
+        if (movePiece->getCastleQ()) {movePiece->setCastleQ(false);}
+      }
 
-      // If the piece just moved
+      // If the piece only moved
       if (state[get<1>(validSquares[i])][get<0>(validSquares[i])] == EMPTY) {
+        // If it is castling
+        if (abs(state[movePiece->getSquareY()][movePiece->getSquareX()]) == KING &&
+            abs(get<0>(validSquares[i]) - movePiece->getSquareX())== 2) {
+          if (get<0>(validSquares[i]) - movePiece->getSquareX() == 2) {
+            *capturedX = CASTLE_SHORT;
+          }
+          else {
+            *capturedX = CASTLE_LONG;
+          }
+        }
         int temp = state[get<1>(validSquares[i])][get<0>(validSquares[i])];
         state[get<1>(validSquares[i])][get<0>(validSquares[i])] = state[movePiece->getSquareY()][movePiece->getSquareX()];
         state[movePiece->getSquareY()][movePiece->getSquareX()] = temp;
       }
 
-      // If the piece just captured
+      // If the piece also captured
       else {
         *capturedPiece = state[get<1>(validSquares[i])][get<0>(validSquares[i])];
         state[get<1>(validSquares[i])][get<0>(validSquares[i])] = state[movePiece->getSquareY()][movePiece->getSquareX()];

@@ -29,9 +29,19 @@ class Piece {
 
     void setIsAlive(bool value);
 
+    virtual void setCastleK(bool value);
+
+    virtual void setCastleQ(bool value);
+
     virtual bool getHasMoved();
 
+    bool getIsWhite();
+
     bool getIsAlive();
+
+    virtual bool getCastleK();
+
+    virtual bool getCastleQ();
 
     shared_ptr<TexturedRect> getTRect();
 

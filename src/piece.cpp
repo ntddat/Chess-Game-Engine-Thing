@@ -41,12 +41,32 @@ void Piece::setIsAlive(bool value) {
   isAlive = value;
 }
 
+void Piece::setCastleK(bool value) {
+
+}
+
+void Piece::setCastleQ(bool value) {
+
+}
+
 bool Piece::getHasMoved() {
 
 }
 
 bool Piece::getIsAlive() {
   return isAlive;
+}
+
+bool Piece::getIsWhite() {
+  return isWhite;
+}
+
+bool Piece::getCastleK() {
+
+}
+
+bool Piece::getCastleQ() {
+
 }
 
 shared_ptr<TexturedRect> Piece::getTRect() {

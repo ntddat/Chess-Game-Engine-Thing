@@ -2,6 +2,7 @@
 #include <vector>
 #include <memory>
 #include <tuple>
+#include <iostream>
 #include <SDL2/SDL.h>
 
 #include "../include/pawn.hpp"
