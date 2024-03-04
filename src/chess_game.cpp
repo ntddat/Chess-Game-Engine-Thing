@@ -5,7 +5,9 @@
 #include <vector>
 #include <memory>
 #include <vector>
+#include <tuple>
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
 
 // #pragma once
 
@@ -171,6 +173,18 @@ int main() {
   hoverRect.w = PIECE_SIDE;
   hoverRect.h = PIECE_SIDE;
 
+  TTF_Init();
+  TTF_Font *font = TTF_OpenFont("../font/RobotoMonoNerdFontMono-Bold.ttf", 32);
+  SDL_Surface *instructionsSurface = TTF_RenderText_Solid(font, "Press 1 for 2-Player Mode", {255, 255, 255});
+  SDL_Texture *instructions = SDL_CreateTextureFromSurface(renderer, instructionsSurface);
+  SDL_FreeSurface(instructionsSurface);
+  int instructionsW, instructionsH;
+  SDL_QueryTexture(instructions, NULL, NULL, &instructionsW, &instructionsH);
+  SDL_Rect instructionsRect;
+  instructionsRect.x = 765;
+  instructionsRect.y = 200;
+  instructionsRect.w = instructionsW;
+  instructionsRect.h = instructionsH;
   // Game loop
   bool gameRunning = true;
   bool leftMBPressed = false;
@@ -180,6 +194,8 @@ int main() {
   shared_ptr<Piece> currPiece;
   shared_ptr<Piece> movePiece;
   int originalX, originalY;
+  vector<tuple<int, int>> validMoves;
+  vector<SDL_Rect> validMovesRects;
   while (gameRunning) {
     SDL_GetMouseState(&mouseX, &mouseY);
 
@@ -213,7 +229,14 @@ int main() {
       hoverRect.x = mouseX - (mouseX % SQUARE_SIDE);
       hoverRect.y = mouseY - (mouseY % SQUARE_SIDE);
       SDL_RenderFillRect(renderer, &hoverRect);
+      for (int i = 0; i < validMovesRects.size(); i++) {
+        SDL_RenderFillRect(renderer, &validMovesRects[i]);
+      }
     }
+
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 0);
+    SDL_RenderCopy(renderer, instructions, NULL, &instructionsRect);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
 
     // Rendering white pieces
     for (int i = 0; i < CHESS_SIDE; i++) {
@@ -298,6 +321,25 @@ int main() {
       if (mouseX < 720) {
         drawHoverRect = true;
       }
+      if (validMovesRects.size() == 0) {
+        validMoves = movePiece->getValidSquares(state);
+        for (int i = 0; i < validMoves.size(); i++) {
+          SDL_Rect newRect;
+          if (state[get<1>(validMoves[i])][get<0>(validMoves[i])]*state[movePiece->getSquareY()][movePiece->getSquareX()] < EMPTY) {
+            newRect.x = get<0>(validMoves[i])*SQUARE_SIDE;
+            newRect.y = get<1>(validMoves[i])*SQUARE_SIDE;
+            newRect.w = SQUARE_SIDE;
+            newRect.h = SQUARE_SIDE;
+          }
+          else {
+            newRect.x = get<0>(validMoves[i])*SQUARE_SIDE + 40;
+            newRect.y = get<1>(validMoves[i])*SQUARE_SIDE + 40;
+            newRect.w = 10;
+            newRect.h = 10;
+          }
+          validMovesRects.push_back(newRect);
+        }
+      }
     }
 
     if (!leftMBPressed) {
@@ -306,8 +348,6 @@ int main() {
         int capturedPiece = EMPTY;
       if (movePiece != NULL) {
         int newX, newY;
-        // bool check = movePiece->makeMove(mouseX, mouseY, state);
-        // cout << check << endl;
         if (mouseX < 720 && makeMove(mouseX, mouseY, state, movePiece, &capturedX, &capturedY, &capturedPiece)) {
           newX = mouseX - (mouseX % SQUARE_SIDE);
           newY = mouseY - (mouseY % SQUARE_SIDE);
@@ -397,12 +437,15 @@ int main() {
       capturedY = -1;
       capturedPiece = EMPTY;
       drawHoverRect = false;
+      validMovesRects.clear();
     }
 
     SDL_RenderPresent(renderer);
 
   }
 
+  SDL_DestroyTexture(instructions);
+  TTF_CloseFont(font);
   SDL_DestroyWindow(window);
   SDL_Quit();
 }
