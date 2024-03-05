@@ -65,7 +65,7 @@ using namespace std;
  } 
  */
 
-bool makeMove(int mouseX, int mouseY, int state[CHESS_SIDE][CHESS_SIDE], shared_ptr<Piece> movePiece, int *capturedX, int *capturedY, int *capturedPiece);
+bool makeMove(int mouseX, int mouseY, int state[CHESS_SIDE][CHESS_SIDE], shared_ptr<Piece> movePiece, int *capturedX, int *capturedY, int *capturedPiece, bool *pawnMovedTwo, bool *isEnPassantNow);
 void capturePiece(int capturedX, int capturedY, vector<shared_ptr<Piece>> arr);
 
 int main() {
@@ -219,6 +219,8 @@ int main() {
   vector<SDL_Rect> validMovesRects;
   int currLevel = MENU;
   bool isWhiteTurn = true;
+  bool pawnMovedTwo = false;
+  bool isEnPassantNow = false;
   while (gameRunning) {
     SDL_GetMouseState(&mouseX, &mouseY);
 
@@ -419,7 +421,7 @@ int main() {
           int capturedPiece = EMPTY;
         if (movePiece != NULL) {
           int newX, newY;
-          if (mouseX < 720 && makeMove(mouseX, mouseY, state, movePiece, &capturedX, &capturedY, &capturedPiece)) {
+          if (mouseX < 720 && makeMove(mouseX, mouseY, state, movePiece, &capturedX, &capturedY, &capturedPiece, &pawnMovedTwo, &isEnPassantNow)) {
             newX = mouseX - (mouseX % SQUARE_SIDE);
             newY = mouseY - (mouseY % SQUARE_SIDE);
             if (capturedX != -1 && capturedY != -1 & capturedPiece != EMPTY) {
@@ -493,8 +495,68 @@ int main() {
               }
             } 
 
+            if (abs(state[movePiece->getSquareY()][movePiece->getSquareX()]) == PAWN) {
+              if (pawnMovedTwo) {
+                if (abs(state[movePiece->getSquareY()][movePiece->getSquareX() - 1]) == PAWN &&
+                    state[movePiece->getSquareY()][movePiece->getSquareX() - 1]*state[movePiece->getSquareY()][movePiece->getSquareX()] < EMPTY) {
+                  if (state[movePiece->getSquareY()][movePiece->getSquareX() - 1] < EMPTY) {
+                    for (int i = 0; i < bPArr.size(); i++) {
+                      if (bPArr[i]->getSquareX() == movePiece->getSquareX() - 1 &&
+                          bPArr[i]->getSquareY() == movePiece->getSquareY()) {
+                        bPArr[i]->setEnPassant(true, 1);
+                        break;
+                      }
+                    }
+                  }
+                  else {
+                    for (int i = 0; i < wPArr.size(); i++) {
+                      if (wPArr[i]->getSquareX() == movePiece->getSquareX() - 1 &&
+                          wPArr[i]->getSquareY() == movePiece->getSquareY()) {
+                        wPArr[i]->setEnPassant(true, 1);
+                        break;
+                      }
+                    }
+                  }
+                }
+                  
+                if (abs(state[movePiece->getSquareY()][movePiece->getSquareX() + 1]) == PAWN &&
+                    state[movePiece->getSquareY()][movePiece->getSquareX() + 1]*state[movePiece->getSquareY()][movePiece->getSquareX()] < EMPTY) {
+                  if (state[movePiece->getSquareY()][movePiece->getSquareX() + 1] < EMPTY) {
+                    for (int i = 0; i < bPArr.size(); i++) {
+                      if (bPArr[i]->getSquareX() == movePiece->getSquareX() + 1 &&
+                          bPArr[i]->getSquareY() == movePiece->getSquareY()) {
+                        bPArr[i]->setEnPassant(true, -1);
+                        break;
+                      }
+                    }
+                  }
+                  else {
+                    for (int i = 0; i < wPArr.size(); i++) {
+                      if (wPArr[i]->getSquareX() == movePiece->getSquareX() + 1 &&
+                          wPArr[i]->getSquareY() == movePiece->getSquareY()) {
+                        wPArr[i]->setEnPassant(true, -1);
+                        break;
+                      }
+                    }
+                  }
+                }
+              }
+              
+              if (isEnPassantNow) {
+                if (state[movePiece->getSquareY()][movePiece->getSquareX()] < EMPTY) {
+                  capturePiece(movePiece->getSquareX(), movePiece->getSquareY() - 1, wPArr);
+                  state[movePiece->getSquareY() - 1][movePiece->getSquareX()] = EMPTY;
+                }
+                else if (state[movePiece->getSquareY()][movePiece->getSquareX()] > EMPTY) {
+                  capturePiece(movePiece->getSquareX(), movePiece->getSquareY() + 1, bPArr);
+                  state[movePiece->getSquareY() + 1][movePiece->getSquareX()] = EMPTY;
+                }
+              }
+            }
+
             isWhiteTurn = !isWhiteTurn;
-            
+            pawnMovedTwo = false;
+            isEnPassantNow = false;
           }
           else {
             newX = originalX;
@@ -526,7 +588,7 @@ int main() {
   SDL_Quit();
 }
 
-bool makeMove(int mouseX, int mouseY, int state[CHESS_SIDE][CHESS_SIDE], shared_ptr<Piece> movePiece, int *capturedX, int *capturedY, int *capturedPiece) {
+bool makeMove(int mouseX, int mouseY, int state[CHESS_SIDE][CHESS_SIDE], shared_ptr<Piece> movePiece, int *capturedX, int *capturedY, int *capturedPiece, bool *pawnMovedTwo, bool *isEnPassantNow) {
   vector<tuple<int, int>> validSquares = movePiece->getValidSquares(state);
   for (int i = 0; i < validSquares.size(); i++) {
     int currX = get<0>(validSquares[i])*SQUARE_SIDE;
@@ -534,7 +596,14 @@ bool makeMove(int mouseX, int mouseY, int state[CHESS_SIDE][CHESS_SIDE], shared_
     if (currX <= mouseX && mouseX <= currX + SQUARE_SIDE &&
         currY <= mouseY && mouseY <= currY + SQUARE_SIDE) {
       if (abs(state[movePiece->getSquareY()][movePiece->getSquareX()]) == PAWN) {
+        if (abs(movePiece->getSquareY() - get<1>(validSquares[i])) == 2) {
+          *pawnMovedTwo = true;
+        }
         if (!movePiece->getHasMoved()) {movePiece->setHasMoved(true);}
+        if (movePiece->getEnPassant()) {
+          movePiece->setEnPassant(false, 0);
+          *isEnPassantNow = true;
+        }
       }
       if (abs(state[movePiece->getSquareY()][movePiece->getSquareX()]) == KING) {
         if (movePiece->getCastleK()) {movePiece->setCastleK(false);}

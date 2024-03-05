@@ -25,8 +25,17 @@ void Pawn::setHasMoved(bool value) {
   hasMoved = value;
 }
 
+void Pawn::setEnPassant(bool value, int num) {
+  enPassantAble = value;
+  enPassantNum = num;
+}
+
 bool Pawn::getHasMoved() {
   return hasMoved;
+}
+
+bool Pawn::getEnPassant() {
+  return enPassantAble;
 }
 
 vector<tuple<int, int>> Pawn::getValidSquares(int state[CHESS_SIDE][CHESS_SIDE]) {
@@ -60,6 +69,9 @@ vector<tuple<int, int>> Pawn::getValidSquares(int state[CHESS_SIDE][CHESS_SIDE])
     validSquares.push_back(make_tuple(squareX + 1, squareY + dir));
   }
   // En passant: *TO BE IMPLEMENTED*
+  if (enPassantAble) {
+    validSquares.push_back(make_tuple(squareX + enPassantNum, squareY + dir));
+  }
   
   return validSquares;
 }

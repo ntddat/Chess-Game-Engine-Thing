@@ -49,6 +49,10 @@ void Piece::setCastleQ(bool value) {
 
 }
 
+void Piece::setEnPassant(bool value, int num) {
+
+}
+
 bool Piece::getHasMoved() {
 
 }
@@ -66,6 +70,10 @@ bool Piece::getCastleK() {
 }
 
 bool Piece::getCastleQ() {
+
+}
+
+bool Piece::getEnPassant() {
 
 }
 

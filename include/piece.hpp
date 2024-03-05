@@ -33,6 +33,8 @@ class Piece {
 
     virtual void setCastleQ(bool value);
 
+    virtual void setEnPassant(bool value, int num);
+
     virtual bool getHasMoved();
 
     bool getIsWhite();
@@ -43,6 +45,8 @@ class Piece {
 
     virtual bool getCastleQ();
 
+    virtual bool getEnPassant();
+
     shared_ptr<TexturedRect> getTRect();
 
     int getSquareX();
@@ -50,8 +54,6 @@ class Piece {
     int getSquareY();
 
     virtual vector<tuple<int, int>> getValidSquares(int state[8][8]);
-
-    // virtual bool makeMove(int mouseX, int mouseY, int state[8][8]);
 };
 
 #endif

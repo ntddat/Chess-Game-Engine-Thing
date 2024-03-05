@@ -14,6 +14,8 @@ using namespace std;
 class Pawn: public Piece {
   private:
     bool hasMoved = false;
+    bool enPassantAble = false;
+    int enPassantNum = 0;
 
   public:
     using Piece::Piece;
@@ -22,7 +24,11 @@ class Pawn: public Piece {
   
     void setHasMoved(bool value);
 
+    void setEnPassant(bool value, int num);
+
     bool getHasMoved();
+
+    bool getEnPassant();
 
     vector<tuple<int, int>> getValidSquares(int state[8][8]);
 
