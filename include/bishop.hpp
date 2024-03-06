@@ -18,6 +18,8 @@ class Bishop: public Piece {
     ~Bishop();
 
     vector<tuple<int, int>> getValidSquares(int state[8][8]);
+
+    bool makeMove(int state[8][8], int mouseX, int mouseY);
 };
 
 #endif

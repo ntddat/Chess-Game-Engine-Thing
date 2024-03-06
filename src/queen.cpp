@@ -11,6 +11,7 @@ using namespace std;
 #define EMPTY 0
 #define KING 6
 #define CHESS_SIDE 8
+#define SQUARE_SIDE 90
 
 Queen::~Queen() {
 
@@ -133,4 +134,21 @@ vector<tuple<int, int>> Queen::getValidSquares(int state[CHESS_SIDE][CHESS_SIDE]
   }
 
   return validSquares;
+}
+
+bool Queen::makeMove(int state[CHESS_SIDE][CHESS_SIDE], int mouseX, int mouseY) {
+  vector<tuple<int, int>> validSquares = this->getValidSquares(state);
+  for (int i = 0; i < validSquares.size(); i++) {
+    int currX = get<0>(validSquares[i]);
+    int currY = get<1>(validSquares[i]);
+    if (currX*SQUARE_SIDE <= mouseX && mouseX <= currX*SQUARE_SIDE + SQUARE_SIDE &&
+        currY*SQUARE_SIDE <= mouseY && mouseY <= currY*SQUARE_SIDE + SQUARE_SIDE) {
+      changeState(state, squareX, squareY, currX, currY, isWhite);
+
+      squareX = currX;
+      squareY = currY;
+      return true;
+    }
+  }
+  return false;
 }

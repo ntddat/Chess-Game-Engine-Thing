@@ -32,7 +32,9 @@ class Pawn: public Piece {
 
     vector<tuple<int, int>> getValidSquares(int state[8][8]);
 
-    // bool makeMove(int mouseX, int mouseY, int state[8][8]);
+    bool makeMove(int state[8][8], int mouseX, int mouseY);
+
+    static void activateEnPassant(vector<shared_ptr<Piece>> arr, int currX, int currY, int value);
 };
 
 #endif

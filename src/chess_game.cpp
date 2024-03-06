@@ -65,8 +65,11 @@ using namespace std;
  } 
  */
 
-bool makeMove(int mouseX, int mouseY, int state[CHESS_SIDE][CHESS_SIDE], shared_ptr<Piece> movePiece, int *capturedX, int *capturedY, int *capturedPiece, bool *pawnMovedTwo, bool *isEnPassantNow);
-void capturePiece(int capturedX, int capturedY, vector<shared_ptr<Piece>> arr);
+// bool makeMove(int mouseX, int mouseY, int state[CHESS_SIDE][CHESS_SIDE], shared_ptr<Piece> movePiece, int *capturedX, int *capturedY, int *capturedPiece, bool *pawnMovedTwo, bool *isEnPassantNow);
+// void capturePiece(int capturedX, int capturedY, vector<shared_ptr<Piece>> arr);
+void initPieces(SDL_Renderer *&renderer);
+void renderPieces(SDL_Renderer *&renderer, shared_ptr<Piece> movePiece);
+void reset(int state[CHESS_SIDE][CHESS_SIDE], int startingState[CHESS_SIDE][CHESS_SIDE], bool *isWhiteTurn);
 
 int main() {
   SDL_Window *window;
@@ -112,61 +115,7 @@ int main() {
   TexturedRect board(renderer, "../images/Chessboard2048.bmp");
   board.setProperties(0, 0, 720, 720);
 
-  /* WHITE PIECES */
-  // Array to store the pieces
-  vector<shared_ptr<Piece>> wPiecesArr;
-  shared_ptr<Piece> wR1 = make_shared<Rook>(renderer, "../images/wr.bmp", true, false, 0, 7);
-  wPiecesArr.push_back(wR1);
-  shared_ptr<Piece> wN1 = make_shared<Knight>(renderer, "../images/wn.bmp", true, false, 1, 7);
-  wPiecesArr.push_back(wN1);
-  shared_ptr<Piece> wB1 = make_shared<Bishop>(renderer, "../images/wb.bmp", true, false, 2, 7);
-  wPiecesArr.push_back(wB1);
-  shared_ptr<Piece> wQ = make_shared<Queen>(renderer, "../images/wq.bmp", true, false, 3, 7);
-  wPiecesArr.push_back(wQ);
-  shared_ptr<Piece> wK = make_shared<King>(renderer, "../images/wk.bmp", true, false, 4, 7);
-  wPiecesArr.push_back(wK);
-  shared_ptr<Piece> wB2 = make_shared<Bishop>(renderer, "../images/wb.bmp", true, false, 5, 7);
-  wPiecesArr.push_back(wB2);
-  shared_ptr<Piece> wN2 = make_shared<Knight>(renderer, "../images/wn.bmp", true, false, 6, 7);
-  wPiecesArr.push_back(wN2);
-  shared_ptr<Piece> wR2 = make_shared<Rook>(renderer, "../images/wr.bmp", true, false, 7, 7);
-  wPiecesArr.push_back(wR2);
-  /* WHITE PIECES */
-  // Array to store the pawns
-  vector<shared_ptr<Piece>> wPArr;
-  // Pawns
-  for (int i = 0; i < CHESS_SIDE; i++) {
-    shared_ptr<Piece> wP = make_shared<Pawn>(renderer, "../images/wp.bmp", true, true, i, 6);
-    wPArr.push_back(wP);
-  }
-
-  /* BLACK PIECES */
-  // Array to store the pieces
-  vector<shared_ptr<Piece>> bPiecesArr;
-  shared_ptr<Piece> bR1 = make_shared<Rook>(renderer, "../images/br.bmp", false, false, 0, 0);
-  bPiecesArr.push_back(bR1);
-  shared_ptr<Piece> bN1 = make_shared<Knight>(renderer, "../images/bn.bmp", false, false, 1, 0);
-  bPiecesArr.push_back(bN1);
-  shared_ptr<Piece> bB1 = make_shared<Bishop>(renderer, "../images/bb.bmp", false, false, 2, 0);
-  bPiecesArr.push_back(bB1);
-  shared_ptr<Piece> bQ = make_shared<Queen>(renderer, "../images/bq.bmp", false, false, 3, 0);
-  bPiecesArr.push_back(bQ);
-  shared_ptr<Piece> bK = make_shared<King>(renderer, "../images/bk.bmp", false, false, 4, 0);
-  bPiecesArr.push_back(bK);
-  shared_ptr<Piece> bB2 = make_shared<Bishop>(renderer, "../images/bb.bmp", false, false, 5, 0);
-  bPiecesArr.push_back(bB2);
-  shared_ptr<Piece> bN2 = make_shared<Knight>(renderer, "../images/bn.bmp", false, false, 6, 0);
-  bPiecesArr.push_back(bN2);
-  // Rooks
-  shared_ptr<Piece> bR2 = make_shared<Rook>(renderer, "../images/br.bmp", false, false, 7, 0);
-  bPiecesArr.push_back(bR2);
-  // Array to store the pawns
-  vector<shared_ptr<Piece>> bPArr;
-  // Pawns
-  for (int i = 0; i < CHESS_SIDE; i++) {
-    shared_ptr<Piece> bP = make_shared<Pawn>(renderer, "../images/bp.bmp", false, true, i, 1);
-    bPArr.push_back(bP);
-  }
+  initPieces(renderer);
 
   SDL_Rect hoverRect;
   hoverRect.x = 0;
@@ -239,36 +188,7 @@ int main() {
         }
         if (currLevel != MENU && event.key.keysym.sym == SDLK_0) {
           currLevel = MENU;
-          isWhiteTurn = true;
-          for (int i = 0; i < wPiecesArr.size(); i++) {
-            if (state[wPiecesArr[i]->getSquareY()][wPiecesArr[i]->getSquareX()] == WHITE*KING) {
-              wPiecesArr[i]->setCastleK(true);
-              wPiecesArr[i]->setCastleQ(true);
-            }
-            wPiecesArr[i]->setSquareXY(i, 7);
-            wPiecesArr[i]->getTRect()->setCoordinates(i*SQUARE_SIDE, 7*SQUARE_SIDE);
-            wPiecesArr[i]->setIsAlive(true);
-            wPArr[i]->setSquareXY(i, 6);
-            wPArr[i]->getTRect()->setCoordinates(i*SQUARE_SIDE, 6*SQUARE_SIDE);
-            wPArr[i]->setIsAlive(true);
-            wPArr[i]->setHasMoved(false);
-            if (state[bPiecesArr[i]->getSquareY()][bPiecesArr[i]->getSquareX()] == BLACK*KING) {
-              bPiecesArr[i]->setCastleK(true);
-              bPiecesArr[i]->setCastleQ(true);
-            }
-            bPiecesArr[i]->setSquareXY(i, 0);
-            bPiecesArr[i]->getTRect()->setCoordinates(i*SQUARE_SIDE, 0*SQUARE_SIDE);
-            bPiecesArr[i]->setIsAlive(true);
-            bPArr[i]->setSquareXY(i, 1);
-            bPArr[i]->getTRect()->setCoordinates(i*SQUARE_SIDE, 1*SQUARE_SIDE);
-            bPArr[i]->setIsAlive(true);
-            bPArr[i]->setHasMoved(false);
-          }
-          for (int i = 0; i < CHESS_SIDE; i++) {
-            for (int j = 0; j < CHESS_SIDE; j++) {
-              state[i][j] = startingState[i][j];
-            }
-          }
+          reset(state, startingState, &isWhiteTurn);
         }
       }
       if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT) {
@@ -307,56 +227,30 @@ int main() {
       SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
     }
 
-    // Rendering white pieces
-    for (int i = 0; i < CHESS_SIDE; i++) {
-      if (wPiecesArr[i]->getIsAlive() &&
-          wPiecesArr[i] != movePiece) {
-        wPiecesArr[i]->getTRect()->render(renderer);
-      }
-      if (wPArr[i]->getIsAlive() &&
-          wPArr[i] != movePiece) {
-        wPArr[i]->getTRect()->render(renderer);
-      }
-    }
-
-    // Rendering black pieces
-    for (int i = 0; i < CHESS_SIDE; i++) {
-      if (bPiecesArr[i]->getIsAlive() &&
-          bPiecesArr[i] != movePiece) {
-        bPiecesArr[i]->getTRect()->render(renderer);
-      }
-      if (bPArr[i]->getIsAlive() &&
-          bPArr[i] != movePiece) {
-        bPArr[i]->getTRect()->render(renderer);
-      }
-    }
-
-    if (movePiece != NULL) {
-      movePiece->getTRect()->render(renderer);
-    }
+    Piece::renderPieces(renderer, movePiece);
 
     /* LOGIC */ 
     if (currLevel != MENU) {
       if (isWhiteTurn) {
         for (int i = 0; i < CHESS_SIDE && currPiece == NULL; i++) {
-          if (wPiecesArr[i]->getIsAlive() &&
-              wPiecesArr[i]->getTRect()->getXValue() <= mouseX && 
-              mouseX <= (wPiecesArr[i]->getTRect()->getXValue() + PIECE_SIDE) &&
-              wPiecesArr[i]->getTRect()->getYValue() <= mouseY && 
-              mouseY <= (wPiecesArr[i]->getTRect()->getYValue() + PIECE_SIDE)) {
-            currPiece = wPiecesArr[i];
+          if (Piece::wPiecesArr[i]->getIsAlive() &&
+              Piece::wPiecesArr[i]->getTRect()->getXValue() <= mouseX && 
+              mouseX <= (Piece::wPiecesArr[i]->getTRect()->getXValue() + PIECE_SIDE) &&
+              Piece::wPiecesArr[i]->getTRect()->getYValue() <= mouseY && 
+              mouseY <= (Piece::wPiecesArr[i]->getTRect()->getYValue() + PIECE_SIDE)) {
+            currPiece = Piece::wPiecesArr[i];
             originalX = currPiece->getTRect()->getXValue();
             originalY = currPiece->getTRect()->getYValue();
           }
         }
 
         for (int i = 0; i < CHESS_SIDE && currPiece == NULL; i++) {
-          if (wPArr[i]->getIsAlive() &&
-              wPArr[i]->getTRect()->getXValue() <= mouseX && 
-              mouseX <= (wPArr[i]->getTRect()->getXValue() + PIECE_SIDE) &&
-              wPArr[i]->getTRect()->getYValue() <= mouseY && 
-              mouseY <= (wPArr[i]->getTRect()->getYValue() + PIECE_SIDE)) {
-            currPiece = wPArr[i];
+          if (Piece::wPArr[i]->getIsAlive() &&
+              Piece::wPArr[i]->getTRect()->getXValue() <= mouseX && 
+              mouseX <= (Piece::wPArr[i]->getTRect()->getXValue() + PIECE_SIDE) &&
+              Piece::wPArr[i]->getTRect()->getYValue() <= mouseY && 
+              mouseY <= (Piece::wPArr[i]->getTRect()->getYValue() + PIECE_SIDE)) {
+            currPiece = Piece::wPArr[i];
             originalX = currPiece->getTRect()->getXValue();
             originalY = currPiece->getTRect()->getYValue();
           }
@@ -364,24 +258,24 @@ int main() {
       }
       else {
         for (int i = 0; i < CHESS_SIDE && currPiece == NULL; i++) {
-          if (bPiecesArr[i]->getIsAlive() &&
-              bPiecesArr[i]->getTRect()->getXValue() <= mouseX && 
-              mouseX <= (bPiecesArr[i]->getTRect()->getXValue() + PIECE_SIDE) &&
-              bPiecesArr[i]->getTRect()->getYValue() <= mouseY && 
-              mouseY <= (bPiecesArr[i]->getTRect()->getYValue() + PIECE_SIDE)) {
-            currPiece = bPiecesArr[i];
+          if (Piece::bPiecesArr[i]->getIsAlive() &&
+              Piece::bPiecesArr[i]->getTRect()->getXValue() <= mouseX && 
+              mouseX <= (Piece::bPiecesArr[i]->getTRect()->getXValue() + PIECE_SIDE) &&
+              Piece::bPiecesArr[i]->getTRect()->getYValue() <= mouseY && 
+              mouseY <= (Piece::bPiecesArr[i]->getTRect()->getYValue() + PIECE_SIDE)) {
+            currPiece = Piece::bPiecesArr[i];
             originalX = currPiece->getTRect()->getXValue();
             originalY = currPiece->getTRect()->getYValue();
           }
         }
         
         for (int i = 0; i < CHESS_SIDE && currPiece == NULL; i++) {
-          if (bPArr[i]->getIsAlive() &&
-              bPArr[i]->getTRect()->getXValue() <= mouseX && 
-              mouseX <= (bPArr[i]->getTRect()->getXValue() + PIECE_SIDE) &&
-              bPArr[i]->getTRect()->getYValue() <= mouseY && 
-              mouseY <= (bPArr[i]->getTRect()->getYValue() + PIECE_SIDE)) {
-            currPiece = bPArr[i];
+          if (Piece::bPArr[i]->getIsAlive() &&
+              Piece::bPArr[i]->getTRect()->getXValue() <= mouseX && 
+              mouseX <= (Piece::bPArr[i]->getTRect()->getXValue() + PIECE_SIDE) &&
+              Piece::bPArr[i]->getTRect()->getYValue() <= mouseY && 
+              mouseY <= (Piece::bPArr[i]->getTRect()->getYValue() + PIECE_SIDE)) {
+            currPiece = Piece::bPArr[i];
             originalX = currPiece->getTRect()->getXValue();
             originalY = currPiece->getTRect()->getYValue();
           }
@@ -416,147 +310,13 @@ int main() {
       }
 
       if (!leftMBPressed) {
-          int capturedX = -1;
-          int capturedY = -1;
-          int capturedPiece = EMPTY;
         if (movePiece != NULL) {
           int newX, newY;
-          if (mouseX < 720 && makeMove(mouseX, mouseY, state, movePiece, &capturedX, &capturedY, &capturedPiece, &pawnMovedTwo, &isEnPassantNow)) {
+          if (mouseX < 720 && movePiece->makeMove(state, mouseX, mouseY)) {
             newX = mouseX - (mouseX % SQUARE_SIDE);
             newY = mouseY - (mouseY % SQUARE_SIDE);
-            if (capturedX != -1 && capturedY != -1 & capturedPiece != EMPTY) {
-              // Disable a piece if it was captured
-              if (capturedPiece < EMPTY) {
-                if (abs(capturedPiece) == PAWN) {
-                  capturePiece(capturedX, capturedY, bPArr);
-                }
-                else {
-                  capturePiece(capturedX, capturedY, bPiecesArr);
-                }
-              }
-              else {
-                if (abs(capturedPiece) == PAWN) {
-                  capturePiece(capturedX, capturedY, wPArr);
-                }
-                else {
-                  capturePiece(capturedX, capturedY, wPiecesArr);
-                }
-              }
-            }
-            // Disable castling if a rook just moved
-            if (abs(state[movePiece->getSquareY()][movePiece->getSquareX()]) == ROOK) {
-              if (movePiece == wR1) {
-                wK->setCastleQ(false);
-              }
-              if (movePiece == wR2) {
-                wK->setCastleK(false);
-              }
-              if (movePiece == bR1) {
-                bK->setCastleQ(false);
-              }
-              if (movePiece == bR2) {
-                bK->setCastleK(false);
-              }
-            }
-            // Moving the rook after castling
-            if (abs(state[movePiece->getSquareY()][movePiece->getSquareX()]) == KING &&
-                capturedX != -1 && capturedY == -1 && capturedPiece == EMPTY) {
-              if (capturedX == CASTLE_SHORT) {
-                if (state[movePiece->getSquareY()][movePiece->getSquareX()] > EMPTY) {
-                  state[wR2->getSquareY()][wR2->getSquareX()] = EMPTY;
-                  state[wR2->getSquareY()][wR2->getSquareX() - 2] = WHITE*ROOK;
-                  wR2->setSquareXY(wR2->getSquareX() - 2, wR2->getSquareY());
-                  wR2->getTRect()->setCoordinates(wR2->getSquareX()*SQUARE_SIDE,
-                                                  wR2->getSquareY()*SQUARE_SIDE);
-                } 
-                else {
-                  state[bR2->getSquareY()][bR2->getSquareX()] = EMPTY;
-                  state[bR2->getSquareY()][bR2->getSquareX() - 2] = BLACK*ROOK;
-                  bR2->setSquareXY(bR2->getSquareX() - 2, bR2->getSquareY());
-                  bR2->getTRect()->setCoordinates(bR2->getSquareX()*SQUARE_SIDE,
-                                                  bR2->getSquareY()*SQUARE_SIDE);
-                }
-              }
-              else if (capturedX == CASTLE_LONG) {
-                if (state[movePiece->getSquareY()][movePiece->getSquareX()] > EMPTY) {
-                  state[wR1->getSquareY()][wR1->getSquareX()] = EMPTY;
-                  state[wR1->getSquareY()][wR1->getSquareX() + 3] = WHITE*ROOK;
-                  wR1->setSquareXY(wR1->getSquareX() + 3, wR1->getSquareY());
-                  wR1->getTRect()->setCoordinates(wR1->getSquareX()*SQUARE_SIDE,
-                                                  wR1->getSquareY()*SQUARE_SIDE);
-                } 
-                else {
-                  state[bR1->getSquareY()][bR1->getSquareX()] = EMPTY;
-                  state[bR1->getSquareY()][bR1->getSquareX() + 3] = BLACK*ROOK;
-                  bR1->setSquareXY(bR1->getSquareX() + 3, bR1->getSquareY());
-                  bR1->getTRect()->setCoordinates(bR1->getSquareX()*SQUARE_SIDE,
-                                                  bR1->getSquareY()*SQUARE_SIDE);
-                }
-              }
-            } 
-
-            if (abs(state[movePiece->getSquareY()][movePiece->getSquareX()]) == PAWN) {
-              if (pawnMovedTwo) {
-                if (abs(state[movePiece->getSquareY()][movePiece->getSquareX() - 1]) == PAWN &&
-                    state[movePiece->getSquareY()][movePiece->getSquareX() - 1]*state[movePiece->getSquareY()][movePiece->getSquareX()] < EMPTY) {
-                  if (state[movePiece->getSquareY()][movePiece->getSquareX() - 1] < EMPTY) {
-                    for (int i = 0; i < bPArr.size(); i++) {
-                      if (bPArr[i]->getSquareX() == movePiece->getSquareX() - 1 &&
-                          bPArr[i]->getSquareY() == movePiece->getSquareY()) {
-                        bPArr[i]->setEnPassant(true, 1);
-                        break;
-                      }
-                    }
-                  }
-                  else {
-                    for (int i = 0; i < wPArr.size(); i++) {
-                      if (wPArr[i]->getSquareX() == movePiece->getSquareX() - 1 &&
-                          wPArr[i]->getSquareY() == movePiece->getSquareY()) {
-                        wPArr[i]->setEnPassant(true, 1);
-                        break;
-                      }
-                    }
-                  }
-                }
-                  
-                if (abs(state[movePiece->getSquareY()][movePiece->getSquareX() + 1]) == PAWN &&
-                    state[movePiece->getSquareY()][movePiece->getSquareX() + 1]*state[movePiece->getSquareY()][movePiece->getSquareX()] < EMPTY) {
-                  if (state[movePiece->getSquareY()][movePiece->getSquareX() + 1] < EMPTY) {
-                    for (int i = 0; i < bPArr.size(); i++) {
-                      if (bPArr[i]->getSquareX() == movePiece->getSquareX() + 1 &&
-                          bPArr[i]->getSquareY() == movePiece->getSquareY()) {
-                        bPArr[i]->setEnPassant(true, -1);
-                        break;
-                      }
-                    }
-                  }
-                  else {
-                    for (int i = 0; i < wPArr.size(); i++) {
-                      if (wPArr[i]->getSquareX() == movePiece->getSquareX() + 1 &&
-                          wPArr[i]->getSquareY() == movePiece->getSquareY()) {
-                        wPArr[i]->setEnPassant(true, -1);
-                        break;
-                      }
-                    }
-                  }
-                }
-              }
-              
-              if (isEnPassantNow) {
-                if (state[movePiece->getSquareY()][movePiece->getSquareX()] < EMPTY) {
-                  capturePiece(movePiece->getSquareX(), movePiece->getSquareY() - 1, wPArr);
-                  state[movePiece->getSquareY() - 1][movePiece->getSquareX()] = EMPTY;
-                }
-                else if (state[movePiece->getSquareY()][movePiece->getSquareX()] > EMPTY) {
-                  capturePiece(movePiece->getSquareX(), movePiece->getSquareY() + 1, bPArr);
-                  state[movePiece->getSquareY() + 1][movePiece->getSquareX()] = EMPTY;
-                }
-              }
-            }
 
             isWhiteTurn = !isWhiteTurn;
-            pawnMovedTwo = false;
-            isEnPassantNow = false;
           }
           else {
             newX = originalX;
@@ -568,9 +328,6 @@ int main() {
         movePiece = NULL;
         originalX = 0;
         originalY = 0;
-        capturedX = -1;
-        capturedY = -1;
-        capturedPiece = EMPTY;
         drawHoverRect = false;
         validMovesRects.clear();
       }
@@ -587,67 +344,115 @@ int main() {
   SDL_DestroyWindow(window);
   SDL_Quit();
 }
+void initPieces(SDL_Renderer *&renderer) {
 
-bool makeMove(int mouseX, int mouseY, int state[CHESS_SIDE][CHESS_SIDE], shared_ptr<Piece> movePiece, int *capturedX, int *capturedY, int *capturedPiece, bool *pawnMovedTwo, bool *isEnPassantNow) {
-  vector<tuple<int, int>> validSquares = movePiece->getValidSquares(state);
-  for (int i = 0; i < validSquares.size(); i++) {
-    int currX = get<0>(validSquares[i])*SQUARE_SIDE;
-    int currY = get<1>(validSquares[i])*SQUARE_SIDE;
-    if (currX <= mouseX && mouseX <= currX + SQUARE_SIDE &&
-        currY <= mouseY && mouseY <= currY + SQUARE_SIDE) {
-      if (abs(state[movePiece->getSquareY()][movePiece->getSquareX()]) == PAWN) {
-        if (abs(movePiece->getSquareY() - get<1>(validSquares[i])) == 2) {
-          *pawnMovedTwo = true;
-        }
-        if (!movePiece->getHasMoved()) {movePiece->setHasMoved(true);}
-        if (movePiece->getEnPassant()) {
-          movePiece->setEnPassant(false, 0);
-          *isEnPassantNow = true;
-        }
-      }
-      if (abs(state[movePiece->getSquareY()][movePiece->getSquareX()]) == KING) {
-        if (movePiece->getCastleK()) {movePiece->setCastleK(false);}
-        if (movePiece->getCastleQ()) {movePiece->setCastleQ(false);}
-      }
-
-      // If the piece only moved
-      if (state[get<1>(validSquares[i])][get<0>(validSquares[i])] == EMPTY) {
-        // If it is castling
-        if (abs(state[movePiece->getSquareY()][movePiece->getSquareX()]) == KING &&
-            abs(get<0>(validSquares[i]) - movePiece->getSquareX())== 2) {
-          if (get<0>(validSquares[i]) - movePiece->getSquareX() == 2) {
-            *capturedX = CASTLE_SHORT;
-          }
-          else {
-            *capturedX = CASTLE_LONG;
-          }
-        }
-        int temp = state[get<1>(validSquares[i])][get<0>(validSquares[i])];
-        state[get<1>(validSquares[i])][get<0>(validSquares[i])] = state[movePiece->getSquareY()][movePiece->getSquareX()];
-        state[movePiece->getSquareY()][movePiece->getSquareX()] = temp;
-      }
-
-      // If the piece also captured
-      else {
-        *capturedPiece = state[get<1>(validSquares[i])][get<0>(validSquares[i])];
-        state[get<1>(validSquares[i])][get<0>(validSquares[i])] = state[movePiece->getSquareY()][movePiece->getSquareX()];
-        state[movePiece->getSquareY()][movePiece->getSquareX()] = EMPTY;
-        *capturedX = get<0>(validSquares[i]);
-        *capturedY = get<1>(validSquares[i]);
-      }
-
-      movePiece->setSquareXY(get<0>(validSquares[i]), get<1>(validSquares[i]));
-      return true;
-    }
+  // Array to store the pieces
+  shared_ptr<Piece> wR1 = make_shared<Rook>(renderer, "../images/wr.bmp", true, false, 0, 7);
+  Piece::wPiecesArr.push_back(wR1);
+  shared_ptr<Piece> wN1 = make_shared<Knight>(renderer, "../images/wn.bmp", true, false, 1, 7);
+  Piece::wPiecesArr.push_back(wN1);
+  shared_ptr<Piece> wB1 = make_shared<Bishop>(renderer, "../images/wb.bmp", true, false, 2, 7);
+  Piece::wPiecesArr.push_back(wB1);
+  shared_ptr<Piece> wQ = make_shared<Queen>(renderer, "../images/wq.bmp", true, false, 3, 7);
+  Piece::wPiecesArr.push_back(wQ);
+  shared_ptr<Piece> wK = make_shared<King>(renderer, "../images/wk.bmp", true, false, 4, 7);
+  Piece::wPiecesArr.push_back(wK);
+  shared_ptr<Piece> wB2 = make_shared<Bishop>(renderer, "../images/wb.bmp", true, false, 5, 7);
+  Piece::wPiecesArr.push_back(wB2);
+  shared_ptr<Piece> wN2 = make_shared<Knight>(renderer, "../images/wn.bmp", true, false, 6, 7);
+  Piece::wPiecesArr.push_back(wN2);
+  shared_ptr<Piece> wR2 = make_shared<Rook>(renderer, "../images/wr.bmp", true, false, 7, 7);
+  Piece::wPiecesArr.push_back(wR2);
+  // Pawns
+  for (int i = 0; i < CHESS_SIDE; i++) {
+    shared_ptr<Piece> wP = make_shared<Pawn>(renderer, "../images/wp.bmp", true, true, i, 6);
+    Piece::wPArr.push_back(wP);
   }
-  return false;
+
+  // Array to store the pieces
+  shared_ptr<Piece> bR1 = make_shared<Rook>(renderer, "../images/br.bmp", false, false, 0, 0);
+  Piece::bPiecesArr.push_back(bR1);
+  shared_ptr<Piece> bN1 = make_shared<Knight>(renderer, "../images/bn.bmp", false, false, 1, 0);
+  Piece::bPiecesArr.push_back(bN1);
+  shared_ptr<Piece> bB1 = make_shared<Bishop>(renderer, "../images/bb.bmp", false, false, 2, 0);
+  Piece::bPiecesArr.push_back(bB1);
+  shared_ptr<Piece> bQ = make_shared<Queen>(renderer, "../images/bq.bmp", false, false, 3, 0);
+  Piece::bPiecesArr.push_back(bQ);
+  shared_ptr<Piece> bK = make_shared<King>(renderer, "../images/bk.bmp", false, false, 4, 0);
+  Piece::bPiecesArr.push_back(bK);
+  shared_ptr<Piece> bB2 = make_shared<Bishop>(renderer, "../images/bb.bmp", false, false, 5, 0);
+  Piece::bPiecesArr.push_back(bB2);
+  shared_ptr<Piece> bN2 = make_shared<Knight>(renderer, "../images/bn.bmp", false, false, 6, 0);
+  Piece::bPiecesArr.push_back(bN2);
+  shared_ptr<Piece> bR2 = make_shared<Rook>(renderer, "../images/br.bmp", false, false, 7, 0);
+  Piece::bPiecesArr.push_back(bR2);
+  // Pawns
+  for (int i = 0; i < CHESS_SIDE; i++) {
+    shared_ptr<Piece> bP = make_shared<Pawn>(renderer, "../images/bp.bmp", false, true, i, 1);
+    Piece::bPArr.push_back(bP);
+  }
 }
 
-void capturePiece(int capturedX, int capturedY, vector<shared_ptr<Piece>> arr) {
-  for (int i = 0; i < CHESS_SIDE; i++) {
-    if (arr[i]->getIsAlive() && capturedX == arr[i]->getSquareX()
-        && capturedY == arr[i]->getSquareY()) {
-      arr[i]->setIsAlive(false);
-    } 
+void renderPieces(SDL_Renderer *&renderer, shared_ptr<Piece> movePiece) {
+    // Rendering white pieces
+    for (int i = 0; i < CHESS_SIDE; i++) {
+      if (Piece::wPiecesArr[i]->getIsAlive() &&
+          Piece::wPiecesArr[i] != movePiece) {
+        Piece::wPiecesArr[i]->getTRect()->render(renderer);
+      }
+      if (Piece::wPArr[i]->getIsAlive() &&
+          Piece::wPArr[i] != movePiece) {
+        Piece::wPArr[i]->getTRect()->render(renderer);
+      }
+    }
+
+    // Rendering black pieces
+    for (int i = 0; i < CHESS_SIDE; i++) {
+      if (Piece::bPiecesArr[i]->getIsAlive() &&
+          Piece::bPiecesArr[i] != movePiece) {
+        Piece::bPiecesArr[i]->getTRect()->render(renderer);
+      }
+      if (Piece::bPArr[i]->getIsAlive() &&
+          Piece::bPArr[i] != movePiece) {
+        Piece::bPArr[i]->getTRect()->render(renderer);
+      }
+    }
+
+    if (movePiece != NULL) {
+      movePiece->getTRect()->render(renderer);
+    }
+
+}
+void reset(int state[CHESS_SIDE][CHESS_SIDE], int startingState[CHESS_SIDE][CHESS_SIDE], bool *isWhiteTurn) {
+  *isWhiteTurn = true;
+  for (int i = 0; i < Piece::wPiecesArr.size(); i++) {
+    if (state[Piece::wPiecesArr[i]->getSquareY()][Piece::wPiecesArr[i]->getSquareX()] == WHITE*KING) {
+      Piece::wPiecesArr[i]->setCastleK(true);
+      Piece::wPiecesArr[i]->setCastleQ(true);
+    }
+    Piece::wPiecesArr[i]->setSquareXY(i, 7);
+    Piece::wPiecesArr[i]->getTRect()->setCoordinates(i*SQUARE_SIDE, 7*SQUARE_SIDE);
+    Piece::wPiecesArr[i]->setIsAlive(true);
+    Piece::wPArr[i]->setSquareXY(i, 6);
+    Piece::wPArr[i]->getTRect()->setCoordinates(i*SQUARE_SIDE, 6*SQUARE_SIDE);
+    Piece::wPArr[i]->setIsAlive(true);
+    Piece::wPArr[i]->setHasMoved(false);
+    if (state[Piece::bPiecesArr[i]->getSquareY()][Piece::bPiecesArr[i]->getSquareX()] == BLACK*KING) {
+      Piece::bPiecesArr[i]->setCastleK(true);
+      Piece::bPiecesArr[i]->setCastleQ(true);
+    }
+    Piece::bPiecesArr[i]->setSquareXY(i, 0);
+    Piece::bPiecesArr[i]->getTRect()->setCoordinates(i*SQUARE_SIDE, 0*SQUARE_SIDE);
+    Piece::bPiecesArr[i]->setIsAlive(true);
+    Piece::bPArr[i]->setSquareXY(i, 1);
+    Piece::bPArr[i]->getTRect()->setCoordinates(i*SQUARE_SIDE, 1*SQUARE_SIDE);
+    Piece::bPArr[i]->setIsAlive(true);
+    Piece::bPArr[i]->setHasMoved(false);
   }
+  for (int i = 0; i < CHESS_SIDE; i++) {
+    for (int j = 0; j < CHESS_SIDE; j++) {
+      state[i][j] = startingState[i][j];
+    }
+  }
+
 }

@@ -33,6 +33,8 @@ class King: public Piece {
     vector<tuple<int, int>> getValidSquares(int state[8][8]);
 
     bool squareIsDefended(int state[8][8], int currX, int currY, int squareX, int squareY);
+
+    bool makeMove(int state[8][8], int mouseX, int mouseY);
 };
 
 #endif

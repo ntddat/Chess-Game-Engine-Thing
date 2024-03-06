@@ -8,6 +8,7 @@
 
 using namespace std;
 
+#define SQUARE_SIDE 90
 #define CHESS_SIDE 8
 #define EMPTY 0
 #define PAWN 1
@@ -19,6 +20,9 @@ using namespace std;
 
 #define POS 1
 #define NEG -1
+
+#define WHITE 1
+#define BLACK -1
 
 King::~King() {
 
@@ -344,4 +348,81 @@ bool King::squareIsDefended(int state[CHESS_SIDE][CHESS_SIDE], int currX, int cu
 
   return false;
 
+}
+
+bool King::makeMove(int state[CHESS_SIDE][CHESS_SIDE], int mouseX, int mouseY) {
+  vector<tuple<int, int>> validSquares = this->getValidSquares(state);
+  for (int i = 0; i < validSquares.size(); i++) {
+    int currX = get<0>(validSquares[i]);
+    int currY = get<1>(validSquares[i]);
+    if (currX*SQUARE_SIDE <= mouseX && mouseX <= currX*SQUARE_SIDE + SQUARE_SIDE &&
+        currY*SQUARE_SIDE <= mouseY && mouseY <= currY*SQUARE_SIDE + SQUARE_SIDE) {
+      if (canCastleK) {canCastleK = false;}
+      if (canCastleQ) {canCastleQ = false;}
+
+      // Moving the rooks if it is a castling move
+      shared_ptr<Piece> currRook = NULL;
+      int color = EMPTY;
+      // Castle long
+      if (squareX - currX == 2) {
+        if (isWhite) {
+          for (int i = 0; i < wPiecesArr.size(); i++) {
+            if (wPiecesArr[i]->getSquareX() == 0) {
+              currRook = wPiecesArr[i];
+              break;
+            }
+          }
+          color = WHITE;
+        }
+        else {
+          for (int i = 0; i < bPiecesArr.size(); i++) {
+            if (bPiecesArr[i]->getSquareX() == 0) {
+              currRook = bPiecesArr[i];
+              break;
+            }
+          }
+          color = BLACK;
+        }
+        state[currRook->getSquareY()][currRook->getSquareX()] = EMPTY;
+        state[currRook->getSquareY()][currRook->getSquareX() + 3] = color*ROOK;
+        currRook->setSquareXY(currRook->getSquareX() + 3, currRook->getSquareY());
+        currRook->getTRect()->setCoordinates(currRook->getSquareX()*SQUARE_SIDE,
+                                             currRook->getSquareY()*SQUARE_SIDE);
+        canCastleQ = false;
+      }
+      else if (currX - squareX == 2) {
+        if (isWhite) {
+          for (int i = 0; i < wPiecesArr.size(); i++) {
+            if (wPiecesArr[i]->getSquareX() == 7) {
+              currRook = wPiecesArr[i];
+              break;
+            }
+          }
+          color = WHITE;
+        }
+        else {
+          for (int i = 0; i < bPiecesArr.size(); i++) {
+            if (bPiecesArr[i]->getSquareX() == 7) {
+              currRook = bPiecesArr[i];
+              break;
+            }
+          }
+          color = BLACK;
+        }
+        state[currRook->getSquareY()][currRook->getSquareX()] = EMPTY;
+        state[currRook->getSquareY()][currRook->getSquareX() - 2] = color*ROOK;
+        currRook->setSquareXY(currRook->getSquareX() - 2, currRook->getSquareY());
+        currRook->getTRect()->setCoordinates(currRook->getSquareX()*SQUARE_SIDE,
+                                             currRook->getSquareY()*SQUARE_SIDE);
+        canCastleK = false;
+      }
+
+      changeState(state, squareX, squareY, currX, currY, isWhite);
+
+      squareX = currX;
+      squareY = currY;
+      return true;
+    }
+  }
+  return false;
 }

@@ -14,8 +14,11 @@ using namespace std;
 
 #define KING 6
 #define EMPTY 0
+#define PAWN 1
 #define SQUARE_SIDE 90
 #define CHESS_SIDE 8
+
+#define TWO_SQUARES 2
 
 Pawn::~Pawn() {
 
@@ -74,6 +77,74 @@ vector<tuple<int, int>> Pawn::getValidSquares(int state[CHESS_SIDE][CHESS_SIDE])
   }
   
   return validSquares;
+}
+
+bool Pawn::makeMove(int state[CHESS_SIDE][CHESS_SIDE], int mouseX, int mouseY) {
+  vector<tuple<int, int>> validSquares = this->getValidSquares(state);
+  int dir;
+  if (isWhite) {dir = NEG;}
+  else {dir = POS;}
+  for (int i = 0; i < validSquares.size(); i++) {
+    int currX = get<0>(validSquares[i]);
+    int currY = get<1>(validSquares[i]);
+    if (currX*SQUARE_SIDE <= mouseX && mouseX <= currX*SQUARE_SIDE + SQUARE_SIDE &&
+        currY*SQUARE_SIDE <= mouseY && mouseY <= currY*SQUARE_SIDE + SQUARE_SIDE) {
+      if (!hasMoved) {hasMoved = true;}
+      // If it is currently en passant
+      if (enPassantAble) {
+        this->setEnPassant(false, 0);
+        if (abs(state[currY][currX]) == EMPTY &&
+            abs(currX - squareX) == 1 && abs(currY - squareY) == 1) {
+          if (isWhite) {
+            capturePiece(bPArr, currX, currY - dir);
+            state[currY - dir][currX] = EMPTY;
+          }
+          else {
+            capturePiece(wPArr, currX, currY - dir);
+            state[currY - dir][currX] = EMPTY;
+          }
+        }
+      }
+      // Activate en passant for enemy pawns if possible
+      if (abs(squareY - currY) == TWO_SQUARES) {
+        if (abs(state[currY][currX - 1]) == PAWN &&
+            state[currY][currX - 1]*state[squareY][squareX] < EMPTY) {
+          if (isWhite) {
+            activateEnPassant(bPArr, currX - 1, currY, POS);
+          }
+          else {
+            activateEnPassant(wPArr, currX - 1, currY, POS);
+          }
+        }
+        if (abs(state[currY][currX + 1]) == PAWN &&
+            state[currY][currX + 1]*state[squareY][squareX] < EMPTY) {
+          if (isWhite) {
+            activateEnPassant(bPArr, currX + 1, currY, NEG);
+          }
+          else {
+            activateEnPassant(wPArr, currX + 1, currY, NEG);
+          }
+        }
+      }
+      
+      changeState(state, squareX, squareY, currX, currY, isWhite);
+
+      squareX = currX;
+      squareY = currY;
+      return true;
+    }
+  }
+  return false;
+}
+
+void Pawn::activateEnPassant(vector<shared_ptr<Piece>> arr, int currX, int currY, int value) {
+  for (int i = 0; i < arr.size(); i++) {
+    if (arr[i]->getSquareX() == currX &&
+        arr[i]->getSquareY() == currY) {
+      arr[i]->setEnPassant(true, value);
+      break;
+    }
+  }
 }
 
 /*
