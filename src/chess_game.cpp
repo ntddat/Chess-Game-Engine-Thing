@@ -11,6 +11,7 @@
 
 // #pragma once
 
+#include "../include/text_rect.hpp"
 #include "../include/textured_rect.hpp"
 #include "../include/pawn.hpp"
 #include "../include/knight.hpp"
@@ -69,7 +70,7 @@ using namespace std;
 // void capturePiece(int capturedX, int capturedY, vector<shared_ptr<Piece>> arr);
 void initPieces(SDL_Renderer *&renderer);
 void renderPieces(SDL_Renderer *&renderer, shared_ptr<Piece> movePiece);
-void reset(int state[CHESS_SIDE][CHESS_SIDE], int startingState[CHESS_SIDE][CHESS_SIDE], bool *isWhiteTurn);
+void reset(SDL_Renderer *&renderer, int state[CHESS_SIDE][CHESS_SIDE], int startingState[CHESS_SIDE][CHESS_SIDE], bool *isWhiteTurn);
 
 int main() {
   SDL_Window *window;
@@ -123,38 +124,16 @@ int main() {
   hoverRect.w = PIECE_SIDE;
   hoverRect.h = PIECE_SIDE;
 
-  int instructionsW, instructionsH;
   TTF_Init();
   TTF_Font *font = TTF_OpenFont("../font/RobotoMonoNerdFontMono-Bold.ttf", 32);
-  SDL_Surface *instructionsMenuS1 = TTF_RenderText_Solid(font, "Press 1 for 2-Player Mode", {255, 255, 255});
-  SDL_Texture *instructionsMenuT1 = SDL_CreateTextureFromSurface(renderer, instructionsMenuS1);
-  SDL_FreeSurface(instructionsMenuS1);
-  SDL_QueryTexture(instructionsMenuT1, NULL, NULL, &instructionsW, &instructionsH);
-  SDL_Rect instructionsRect1;
-  instructionsRect1.x = 765;
-  instructionsRect1.y = 200;
-  instructionsRect1.w = instructionsW;
-  instructionsRect1.h = instructionsH;
+  TextRect instructionsMenu1(renderer, font, "Press 1 for 2-Player Mode", 765, 200);
+  TextRect instructionsMenu2(renderer, font, "Press 2 to play an engine", 765, 320);
+  TextRect instructionsExit(renderer, font, "Press 0 to go back to menu", 755, 200);
+  TextRect promotionKnight(renderer, font, "Press 1 to promote to Knight", 735, 250);
+  TextRect promotionBishop(renderer, font, "Press 2 to promote to Bishop", 735, 300);
+  TextRect promotionRook(renderer, font, "Press 3 to promote to Rook", 735, 350);
+  TextRect promotionQueen(renderer, font, "Press 4 to promote to Queen", 735, 400);
 
-  SDL_Surface *instructionsMenuS2 = TTF_RenderText_Solid(font, "Press 2 to play an engine", {255, 255, 255});
-  SDL_Texture *instructionsMenuT2 = SDL_CreateTextureFromSurface(renderer, instructionsMenuS2);
-  SDL_FreeSurface(instructionsMenuS2);
-  SDL_QueryTexture(instructionsMenuT2, NULL, NULL, &instructionsW, &instructionsH);
-  SDL_Rect instructionsRect2;
-  instructionsRect2.x = 765;
-  instructionsRect2.y = 320;
-  instructionsRect2.w = instructionsW;
-  instructionsRect2.h = instructionsH;
-
-  SDL_Surface *instructionsLevelS = TTF_RenderText_Solid(font, "Press 0 to go back to menu", {255, 255, 255});
-  SDL_Texture *instructionsLevelT = SDL_CreateTextureFromSurface(renderer, instructionsLevelS);
-  SDL_FreeSurface(instructionsLevelS);
-  SDL_QueryTexture(instructionsLevelT, NULL, NULL, &instructionsW, &instructionsH);
-  SDL_Rect instructionsRect3;
-  instructionsRect3.x = 760;
-  instructionsRect3.y = 200;
-  instructionsRect3.w = instructionsW;
-  instructionsRect3.h = instructionsH;
   // Game loop
   bool gameRunning = true;
   bool leftMBPressed = false;
@@ -168,8 +147,9 @@ int main() {
   vector<SDL_Rect> validMovesRects;
   int currLevel = MENU;
   bool isWhiteTurn = true;
-  bool pawnMovedTwo = false;
-  bool isEnPassantNow = false;
+  bool isPromotion = false;
+  shared_ptr<Piece> promotionPawn = NULL;
+  int promoteTo = EMPTY;
   while (gameRunning) {
     SDL_GetMouseState(&mouseX, &mouseY);
 
@@ -188,7 +168,23 @@ int main() {
         }
         if (currLevel != MENU && event.key.keysym.sym == SDLK_0) {
           currLevel = MENU;
-          reset(state, startingState, &isWhiteTurn);
+          reset(renderer, state, startingState, &isWhiteTurn);
+        }
+        if (currLevel != MENU && isPromotion && promoteTo == EMPTY) {
+          switch (event.key.keysym.sym) {
+            case SDLK_1:
+              promoteTo = KNIGHT;
+              break;
+            case SDLK_2:
+              promoteTo = BISHOP;
+              break;
+            case SDLK_3:
+              promoteTo = ROOK;
+              break;
+            case SDLK_4:
+              promoteTo = QUEEN;
+              break;
+          }
         }
       }
       if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT) {
@@ -217,13 +213,19 @@ int main() {
     
     if (currLevel == MENU) {
       SDL_SetRenderDrawColor(renderer, 255, 255, 255, 0);
-      SDL_RenderCopy(renderer, instructionsMenuT1, NULL, &instructionsRect1);
-      SDL_RenderCopy(renderer, instructionsMenuT2, NULL, &instructionsRect2);
+      instructionsMenu1.render(renderer);
+      instructionsMenu2.render(renderer);
       SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
     }
     else {
       SDL_SetRenderDrawColor(renderer, 255, 255, 255, 0);
-      SDL_RenderCopy(renderer, instructionsLevelT, NULL, &instructionsRect3);
+      instructionsExit.render(renderer);
+      if (isPromotion && promoteTo == EMPTY) {
+        promotionKnight.render(renderer);
+        promotionBishop.render(renderer);
+        promotionRook.render(renderer);
+        promotionQueen.render(renderer);
+      }
       SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
     }
 
@@ -232,7 +234,7 @@ int main() {
     /* LOGIC */ 
     if (currLevel != MENU) {
       if (isWhiteTurn) {
-        for (int i = 0; i < CHESS_SIDE && currPiece == NULL; i++) {
+        for (int i = 0; i < Piece::wPiecesArr.size() && currPiece == NULL; i++) {
           if (Piece::wPiecesArr[i]->getIsAlive() &&
               Piece::wPiecesArr[i]->getTRect()->getXValue() <= mouseX && 
               mouseX <= (Piece::wPiecesArr[i]->getTRect()->getXValue() + PIECE_SIDE) &&
@@ -244,7 +246,7 @@ int main() {
           }
         }
 
-        for (int i = 0; i < CHESS_SIDE && currPiece == NULL; i++) {
+        for (int i = 0; i < Piece::wPArr.size() && currPiece == NULL; i++) {
           if (Piece::wPArr[i]->getIsAlive() &&
               Piece::wPArr[i]->getTRect()->getXValue() <= mouseX && 
               mouseX <= (Piece::wPArr[i]->getTRect()->getXValue() + PIECE_SIDE) &&
@@ -257,7 +259,7 @@ int main() {
         }
       }
       else {
-        for (int i = 0; i < CHESS_SIDE && currPiece == NULL; i++) {
+        for (int i = 0; i < Piece::bPiecesArr.size() && currPiece == NULL; i++) {
           if (Piece::bPiecesArr[i]->getIsAlive() &&
               Piece::bPiecesArr[i]->getTRect()->getXValue() <= mouseX && 
               mouseX <= (Piece::bPiecesArr[i]->getTRect()->getXValue() + PIECE_SIDE) &&
@@ -269,7 +271,7 @@ int main() {
           }
         }
         
-        for (int i = 0; i < CHESS_SIDE && currPiece == NULL; i++) {
+        for (int i = 0; i < Piece::bPArr.size() && currPiece == NULL; i++) {
           if (Piece::bPArr[i]->getIsAlive() &&
               Piece::bPArr[i]->getTRect()->getXValue() <= mouseX && 
               mouseX <= (Piece::bPArr[i]->getTRect()->getXValue() + PIECE_SIDE) &&
@@ -282,7 +284,70 @@ int main() {
         }
       }
 
-      if (leftMBPressed && currPiece != NULL) {
+      if (isPromotion && promotionPawn != NULL && promoteTo != EMPTY) {
+        if (promotionPawn->getIsWhite()) {
+          state[promotionPawn->getSquareY()][promotionPawn->getSquareX()] = WHITE*promoteTo;
+          for (int i = 0; i < Piece::wPArr.size(); i++) {
+            if (promotionPawn == Piece::wPArr[i]) {
+              shared_ptr<Piece> newPiece;
+              switch (promoteTo) {
+                case KNIGHT:
+                  newPiece = make_shared<Knight>(renderer, "../images/wn.bmp", true, false,
+                                                 promotionPawn->getSquareX(), promotionPawn->getSquareY());
+                  break;
+                case BISHOP:
+                  newPiece = make_shared<Bishop>(renderer, "../images/wb.bmp", true, false,
+                                                 promotionPawn->getSquareX(), promotionPawn->getSquareY());
+                  break;
+                case ROOK:
+                  newPiece = make_shared<Rook>(renderer, "../images/wr.bmp", true, false,
+                                                 promotionPawn->getSquareX(), promotionPawn->getSquareY());
+                  break;
+                case QUEEN:
+                  newPiece = make_shared<Queen>(renderer, "../images/wq.bmp", true, false,
+                                                 promotionPawn->getSquareX(), promotionPawn->getSquareY());
+                  break;
+              }
+              Piece::wPiecesArr.push_back(newPiece);
+              Piece::wPArr.erase(Piece::wPArr.begin() + i);
+            }
+          }
+        }
+        else {
+          state[promotionPawn->getSquareY()][promotionPawn->getSquareX()] = BLACK*promoteTo;
+          for (int i = 0; i < Piece::bPArr.size(); i++) {
+            if (promotionPawn == Piece::bPArr[i]) {
+              shared_ptr<Piece> newPiece;
+              switch (promoteTo) {
+                case KNIGHT:
+                  newPiece = make_shared<Knight>(renderer, "../images/bn.bmp", false, false,
+                                                 promotionPawn->getSquareX(), promotionPawn->getSquareY());
+                  break;
+                case BISHOP:
+                  newPiece = make_shared<Bishop>(renderer, "../images/bb.bmp", false, false,
+                                                 promotionPawn->getSquareX(), promotionPawn->getSquareY());
+                  break;
+                case ROOK:
+                  newPiece = make_shared<Rook>(renderer, "../images/br.bmp", false, false,
+                                                 promotionPawn->getSquareX(), promotionPawn->getSquareY());
+                  break;
+                case QUEEN:
+                  newPiece = make_shared<Queen>(renderer, "../images/bq.bmp", false, false,
+                                                 promotionPawn->getSquareX(), promotionPawn->getSquareY());
+                  break;
+              }
+              Piece::bPiecesArr.push_back(newPiece);
+              Piece::bPArr.erase(Piece::bPArr.begin() + i);
+            }
+          }
+
+        }
+        isPromotion = false;
+        promotionPawn = NULL;
+        promoteTo = EMPTY;
+      }
+
+      if (leftMBPressed && currPiece != NULL && !isPromotion) {
         movePiece = currPiece;
         movePiece->getTRect()->setCoordinates(mouseX - PIECE_SIDE/2, mouseY - PIECE_SIDE/2);
         if (mouseX < 720) {
@@ -313,8 +378,15 @@ int main() {
         if (movePiece != NULL) {
           int newX, newY;
           if (mouseX < 720 && movePiece->makeMove(state, mouseX, mouseY)) {
-            newX = mouseX - (mouseX % SQUARE_SIDE);
-            newY = mouseY - (mouseY % SQUARE_SIDE);
+            if (abs(state[movePiece->getSquareY()][movePiece->getSquareX()]) == PAWN &&
+                (movePiece->getSquareY() == 0 || movePiece->getSquareY() == 7))  {
+              isPromotion = true;
+              promotionPawn = movePiece;
+            }
+            if (movePiece != NULL) {
+              newX = movePiece->getSquareX()*SQUARE_SIDE;
+              newY = movePiece->getSquareY()*SQUARE_SIDE;
+            }
 
             isWhiteTurn = !isWhiteTurn;
           }
@@ -337,9 +409,6 @@ int main() {
 
   }
 
-  SDL_DestroyTexture(instructionsMenuT1);
-  SDL_DestroyTexture(instructionsMenuT2);
-  SDL_DestroyTexture(instructionsLevelT);
   TTF_CloseFont(font);
   SDL_DestroyWindow(window);
   SDL_Quit();
@@ -423,32 +492,13 @@ void renderPieces(SDL_Renderer *&renderer, shared_ptr<Piece> movePiece) {
     }
 
 }
-void reset(int state[CHESS_SIDE][CHESS_SIDE], int startingState[CHESS_SIDE][CHESS_SIDE], bool *isWhiteTurn) {
+void reset(SDL_Renderer *&renderer, int state[CHESS_SIDE][CHESS_SIDE], int startingState[CHESS_SIDE][CHESS_SIDE], bool *isWhiteTurn) {
   *isWhiteTurn = true;
-  for (int i = 0; i < Piece::wPiecesArr.size(); i++) {
-    if (state[Piece::wPiecesArr[i]->getSquareY()][Piece::wPiecesArr[i]->getSquareX()] == WHITE*KING) {
-      Piece::wPiecesArr[i]->setCastleK(true);
-      Piece::wPiecesArr[i]->setCastleQ(true);
-    }
-    Piece::wPiecesArr[i]->setSquareXY(i, 7);
-    Piece::wPiecesArr[i]->getTRect()->setCoordinates(i*SQUARE_SIDE, 7*SQUARE_SIDE);
-    Piece::wPiecesArr[i]->setIsAlive(true);
-    Piece::wPArr[i]->setSquareXY(i, 6);
-    Piece::wPArr[i]->getTRect()->setCoordinates(i*SQUARE_SIDE, 6*SQUARE_SIDE);
-    Piece::wPArr[i]->setIsAlive(true);
-    Piece::wPArr[i]->setHasMoved(false);
-    if (state[Piece::bPiecesArr[i]->getSquareY()][Piece::bPiecesArr[i]->getSquareX()] == BLACK*KING) {
-      Piece::bPiecesArr[i]->setCastleK(true);
-      Piece::bPiecesArr[i]->setCastleQ(true);
-    }
-    Piece::bPiecesArr[i]->setSquareXY(i, 0);
-    Piece::bPiecesArr[i]->getTRect()->setCoordinates(i*SQUARE_SIDE, 0*SQUARE_SIDE);
-    Piece::bPiecesArr[i]->setIsAlive(true);
-    Piece::bPArr[i]->setSquareXY(i, 1);
-    Piece::bPArr[i]->getTRect()->setCoordinates(i*SQUARE_SIDE, 1*SQUARE_SIDE);
-    Piece::bPArr[i]->setIsAlive(true);
-    Piece::bPArr[i]->setHasMoved(false);
-  }
+  Piece::wPiecesArr.clear();
+  Piece::wPArr.clear();
+  Piece::bPiecesArr.clear();
+  Piece::bPArr.clear();
+  initPieces(renderer);
   for (int i = 0; i < CHESS_SIDE; i++) {
     for (int j = 0; j < CHESS_SIDE; j++) {
       state[i][j] = startingState[i][j];

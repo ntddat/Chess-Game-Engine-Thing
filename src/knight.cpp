@@ -24,12 +24,14 @@ vector<tuple<int, int>> Knight::getValidSquares(int state[8][8]) {
   if (0 <= squareX + 2 && squareX + 2 <= CHESS_SIDE - 1) {
     if (0 <= squareY + 1 && squareY + 1 <= CHESS_SIDE - 1 &&
         state[squareY + 1][squareX + 2]*thisPiece <= EMPTY &&
-        abs(state[squareY + 1][squareX + 2]) != KING) {
+        abs(state[squareY + 1][squareX + 2]) != KING &&
+        !kingInCheck(state, squareX + 2, squareY + 1, squareX, squareY, false)) {
       validSquares.push_back(make_tuple(squareX + 2, squareY + 1));
     }
     if (0 <= squareY - 1 && squareY - 1 <= CHESS_SIDE - 1 &&
         state[squareY - 1][squareX + 2]*thisPiece <= EMPTY &&
-        abs(state[squareY - 1][squareX + 2]) != KING) {
+        abs(state[squareY - 1][squareX + 2]) != KING &&
+        !kingInCheck(state, squareX + 2, squareY - 1, squareX, squareY, false)) {
       validSquares.push_back(make_tuple(squareX + 2, squareY - 1));
     }
   }
@@ -37,12 +39,14 @@ vector<tuple<int, int>> Knight::getValidSquares(int state[8][8]) {
   if (0 <= squareX - 2 && squareX - 2 <= CHESS_SIDE - 1) {
     if (0 <= squareY + 1 && squareY + 1 <= CHESS_SIDE - 1 &&
         state[squareY + 1][squareX - 2]*thisPiece <= EMPTY &&
-        abs(state[squareY + 1][squareX - 2]) != KING) {
+        abs(state[squareY + 1][squareX - 2]) != KING &&
+        !kingInCheck(state, squareX - 2, squareY + 1, squareX, squareY, false)) {
       validSquares.push_back(make_tuple(squareX - 2, squareY + 1));
     }
     if (0 <= squareY - 1 && squareY - 1 <= CHESS_SIDE - 1 &&
         state[squareY - 1][squareX - 2]*thisPiece <= EMPTY &&
-        abs(state[squareY - 1][squareX - 2]) != KING) {
+        abs(state[squareY - 1][squareX - 2]) != KING &&
+        !kingInCheck(state, squareX - 2, squareY - 1, squareX, squareY, false)) {
       validSquares.push_back(make_tuple(squareX - 2, squareY - 1));
     }
   }
@@ -50,12 +54,14 @@ vector<tuple<int, int>> Knight::getValidSquares(int state[8][8]) {
   if (0 <= squareY + 2 && squareY + 2 <= CHESS_SIDE - 1) {
     if (0 <= squareX + 1 && squareX + 1 <= CHESS_SIDE - 1 &&
         state[squareY + 2][squareX + 1]*thisPiece <= EMPTY &&
-        abs(state[squareY + 2][squareX + 1]) != KING) {
+        abs(state[squareY + 2][squareX + 1]) != KING &&
+        !kingInCheck(state, squareX + 1, squareY + 2, squareX, squareY, false)) {
       validSquares.push_back(make_tuple(squareX + 1, squareY + 2));
     }
     if (0 <= squareX - 1 && squareX - 1 <= CHESS_SIDE - 1 &&
         state[squareY + 2][squareX - 1]*thisPiece <= EMPTY &&
-        abs(state[squareY + 2][squareX - 1]) != KING) {
+        abs(state[squareY + 2][squareX - 1]) != KING &&
+        !kingInCheck(state, squareX - 1, squareY + 2, squareX, squareY, false)) {
       validSquares.push_back(make_tuple(squareX - 1, squareY + 2));
     }
   }
@@ -63,12 +69,14 @@ vector<tuple<int, int>> Knight::getValidSquares(int state[8][8]) {
   if (0 <= squareY - 2 && squareY - 2 <= CHESS_SIDE) {
     if (0 <= squareX + 1 && squareX + 1 <= CHESS_SIDE - 1 &&
         state[squareY - 2][squareX + 1]*thisPiece <= EMPTY &&
-        abs(state[squareY - 2][squareX + 1]) != KING) {
+        abs(state[squareY - 2][squareX + 1]) != KING &&
+        !kingInCheck(state, squareX + 1, squareY - 2, squareX, squareY, false)) {
       validSquares.push_back(make_tuple(squareX + 1, squareY - 2));
     }
     if (0 <= squareX - 1 && squareX - 1 <= CHESS_SIDE - 1 &&
         state[squareY - 2][squareX - 1]*thisPiece <= EMPTY &&
-        abs(state[squareY - 2][squareX - 1]) != KING) {
+        abs(state[squareY - 2][squareX - 1]) != KING &&
+        !kingInCheck(state, squareX - 1, squareY - 2, squareX, squareY, false)) {
       validSquares.push_back(make_tuple(squareX - 1, squareY - 2));
     }
   }

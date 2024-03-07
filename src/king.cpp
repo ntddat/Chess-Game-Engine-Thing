@@ -101,6 +101,7 @@ vector<tuple<int, int>> King::getValidSquares(int state[CHESS_SIDE][CHESS_SIDE])
   // Castle short
   if (canCastleK && state[squareY][squareX + 1] == EMPTY &&
       state[squareY][squareX + 2] == EMPTY &&
+      !squareIsDefended(state, squareX, squareY, squareX, squareY) &&
       !squareIsDefended(state, squareX + 1, squareY, squareX, squareY) &&
       !squareIsDefended(state, squareX + 2, squareY, squareX, squareY)) {
     validSquares.push_back(make_tuple(squareX + 2, squareY));
@@ -109,6 +110,7 @@ vector<tuple<int, int>> King::getValidSquares(int state[CHESS_SIDE][CHESS_SIDE])
   if (canCastleQ && state[squareY][squareX - 1] == EMPTY &&
       state[squareY][squareX - 2] == EMPTY &&
       state[squareY][squareX - 3] == EMPTY &&
+      !squareIsDefended(state, squareX, squareY, squareX, squareY) &&
       !squareIsDefended(state, squareX - 1, squareY, squareX, squareY) &&
       !squareIsDefended(state, squareX - 2, squareY, squareX, squareY) &&
       !squareIsDefended(state, squareX - 3, squareY, squareX, squareY)) {
@@ -118,237 +120,237 @@ vector<tuple<int, int>> King::getValidSquares(int state[CHESS_SIDE][CHESS_SIDE])
   return validSquares;
 }
 
-bool King::squareIsDefended(int state[CHESS_SIDE][CHESS_SIDE], int currX, int currY, int squareX, int squareY) {
-  int thisPiece = state[squareY][squareX];
-
-  // Checking pawns
-  int dir;
-  if (isWhite) {dir = NEG;}
-  else {dir = POS;}
-  if (currY + dir <= CHESS_SIDE - 1 && 0 <= currX - 1 &&
-      state[currY + dir][currX - 1]*thisPiece < EMPTY &&
-      abs(state[currY + dir][currX - 1]) == PAWN) {
-    return true;
-  }
-  if (currY + dir <= CHESS_SIDE - 1 && 
-      currX + 1 <= CHESS_SIDE - 1 &&
-      state[currY + dir][currX + 1]*thisPiece < EMPTY &&
-      abs(state[currY + dir][currX + 1]) == PAWN) {
-    return true;
-  }
-
-  // Checking knights
-  if (currY + 1 <= CHESS_SIDE - 1 &&
-      currX + 2 <= CHESS_SIDE - 1 &&
-      state[currY + 1][currX + 2]*thisPiece < EMPTY &&
-      abs(state[currY + 1][currX + 2]) == KNIGHT) {
-    return true;
-  }
-  if (currY + 1 <= CHESS_SIDE - 1 && currX - 2 >= 0 &&
-      state[currY + 1][currX - 2]*thisPiece < EMPTY &&
-      abs(state[currY + 1][currX - 2]) == KNIGHT) {
-    return true;
-  }
-  if (currY - 1 >= 0 && currX + 2 <= CHESS_SIDE - 1 &&
-      state[currY - 1][currX + 2]*thisPiece < EMPTY &&
-      abs(state[currY - 1][currX + 2]) == KNIGHT) {
-    return true;
-  }
-  if (currY - 1 >= 0 && currX - 2 <= 0 &&
-      state[currY - 1][currX + 2]*thisPiece < EMPTY &&
-      abs(state[currY - 1][currX + 2]) == KNIGHT) {
-    return true;
-  }
-  if (currY + 2 <= CHESS_SIDE - 1 &&
-      currX + 1 <= CHESS_SIDE - 1 &&
-      state[currY + 2][currX + 1]*thisPiece < EMPTY &&
-      abs(state[currY + 2][currX + 1]) == KNIGHT) {
-    return true;
-  }
-  if (currY + 2 <= CHESS_SIDE - 1 && currX - 1 >= 0 &&
-      state[currY + 2][currX - 1]*thisPiece < EMPTY &&
-      abs(state[currY + 2][currX - 1]) == KNIGHT) {
-    return true;
-  }
-  if (currY - 2 >= 0 && currX + 1 <= CHESS_SIDE - 1 &&
-      state[currY - 2][currX + 1]*thisPiece < EMPTY &&
-      abs(state[currY - 2][currX + 1]) == KNIGHT) {
-    return true;
-  }
-  if (currY - 2 >= 0 && currX - 1 >= 0 &&
-      state[currY - 2][currX - 1]*thisPiece < EMPTY &&
-      abs(state[currY - 2][currX - 1]) == KNIGHT) {
-    return true;
-  }
-
-  // ChecKing (hilarious)
-  if (currY + 1 <= CHESS_SIDE - 1 &&
-      currX + 1 <= CHESS_SIDE - 1 &&
-      state[currY + 1][currX + 1]*thisPiece < EMPTY &&
-      abs(state[currY + 1][currX + 1]) == KING) {
-    return true;
-  }
-  if (currY + 1 <= CHESS_SIDE - 1 &&
-      state[currY + 1][currX]*thisPiece < EMPTY &&
-      abs(state[currY + 1][currX]) == KING) {
-    return true;
-  }
-  if (currX + 1 <= CHESS_SIDE - 1 &&
-      state[currY][currX + 1]*thisPiece < EMPTY &&
-      abs(state[currY][currX + 1]) == KING) {
-    return true;
-  }
-  if (currY - 1 >= 0 && currX + 1 <= CHESS_SIDE - 1 &&
-      state[currY - 1][currX + 1]*thisPiece < EMPTY &&
-      abs(state[currY - 1][currX + 1]) == KING) {
-    return true;
-  }
-  if (currY + 1 <= CHESS_SIDE - 1 && currX - 1 >= 0 &&
-      state[currY + 1][currX - 1]*thisPiece < EMPTY &&
-      abs(state[currY + 1][currX - 1]) == KING) {
-    return true;
-  }
-  if (currY - 1 >= 0 && currX - 1 >= 0 &&
-      state[currY - 1][currX - 1]*thisPiece < EMPTY &&
-      abs(state[currY - 1][currX - 1]) == KING) {
-    return true;
-  }
-  if (currY - 1 >= 0 &&
-      state[currY - 1][currX]*thisPiece < EMPTY &&
-      abs(state[currY - 1][currX]) == KING) {
-    return true;
-  }
-  if (currX - 1 >= 0 &&
-      state[currY][currX - 1]*thisPiece < EMPTY &&
-      abs(state[currY][currX - 1]) == KING) {
-    return true;
-  }
-
-  // Checking the straight lines
-  for (int i = 1; currX + i <= CHESS_SIDE - 1; i++) {
-    if (state[currY][currX + i]*thisPiece > EMPTY) {
-      break;
-    }
-    else if (state[currY][currX + i]*thisPiece < EMPTY) {
-      if (abs(state[currY][currX + i]) == ROOK ||
-          abs(state[currY][currX + i]) == QUEEN) {
-        return true;
-      }
-      else {
-        break;
-      }
-    }
-  }
-
-  for (int i = 1; currX - i >= 0; i++) {
-    if (state[currY][currX - i]*thisPiece > EMPTY) {
-      break;
-    }
-    else if (state[currY][currX - i]*thisPiece < EMPTY) {
-      if (abs(state[currY][currX - i]) == ROOK ||
-          abs(state[currY][currX - i]) == QUEEN) {
-        return true;
-      }
-      else {
-        break;
-      }
-    }
-  }
-
-  for (int i = 1; currY + i <= CHESS_SIDE - 1; i++) {
-    if (state[currY + i][currX]*thisPiece > EMPTY) {
-      break;
-    }
-    else if (state[currY + i][currX]*thisPiece < EMPTY) {
-      if (abs(state[currY + i][currX]) == ROOK ||
-          abs(state[currY + i][currX]) == QUEEN) {
-        return true;
-      }
-      else {
-        break;
-      }
-    }
-  }
-  
-  for (int i = 1; currY - i >= 0; i++) {
-    if (state[currY - i][currX]*thisPiece > EMPTY) {
-      break;
-    }
-    else if (state[currY - i][currX]*thisPiece < EMPTY) {
-      if (abs(state[currY - i][currX]) == ROOK ||
-          abs(state[currY - i][currX]) == QUEEN) {
-        return true;
-      }
-      else {
-        break;
-      }
-    }
-  }
-
-  // Checking the diagonals
-  for (int i = 1; currX + i <= CHESS_SIDE - 1 && currY + i <= CHESS_SIDE - 1; i++) {
-    if (state[currY + i][currX + i]*thisPiece > EMPTY) {
-      break;
-    }
-    else if (state[currY + i][currX + i]*thisPiece < EMPTY) {
-      if (abs(state[currY + i][currX + i]) == BISHOP ||
-          abs(state[currY + i][currX + i]) == QUEEN) {
-        return true;
-      }
-      else {
-        break;
-      }
-    }
-  }
-
-  for (int i = 1; currX - i >= 0 && currY + i <= CHESS_SIDE - 1; i++) {
-    if (state[currY + i][currX - i]*thisPiece > EMPTY) {
-      break;
-    }
-    else if (state[currY + i][currX - i]*thisPiece < EMPTY) {
-      if (abs(state[currY + i][currX - i]) == BISHOP ||
-          abs(state[currY + i][currX - i]) == QUEEN) {
-        return true;
-      }
-      else {
-        break;
-      }
-    }
-  }
-
-  for (int i = 1; currX + i <= CHESS_SIDE - 1 && currY - i >= 0; i++) {
-    if (state[currY - i][currX + i]*thisPiece > EMPTY) {
-      break;
-    }
-    else if (state[currY - i][currX + i]*thisPiece < EMPTY) {
-      if (abs(state[currY - i][currX + i]) == BISHOP ||
-          abs(state[currY - i][currX + i]) == QUEEN) {
-        return true;
-      }
-      else {
-        break;
-      }
-    }
-  }
-
-  for (int i = 1; currX - i >= 0 && currY - i >= 0; i++) {
-    if (state[currY - i][currX - i]*thisPiece > EMPTY) {
-      break;
-    }
-    else if (state[currY - i][currX - i]*thisPiece < EMPTY) {
-      if (abs(state[currY - i][currX - i]) == BISHOP ||
-          abs(state[currY - i][currX - i]) == QUEEN) {
-        return true;
-      }
-      else {
-        break;
-      }
-    }
-  }
-
-  return false;
-
-}
+// bool King::squareIsDefended(int state[CHESS_SIDE][CHESS_SIDE], int currX, int currY, int squareX, int squareY) {
+//   int thisPiece = state[squareY][squareX];
+//
+//   // Checking pawns
+//   int dir;
+//   if (isWhite) {dir = NEG;}
+//   else {dir = POS;}
+//   if (currY + dir <= CHESS_SIDE - 1 && 0 <= currX - 1 &&
+//       state[currY + dir][currX - 1]*thisPiece < EMPTY &&
+//       abs(state[currY + dir][currX - 1]) == PAWN) {
+//     return true;
+//   }
+//   if (currY + dir <= CHESS_SIDE - 1 && 
+//       currX + 1 <= CHESS_SIDE - 1 &&
+//       state[currY + dir][currX + 1]*thisPiece < EMPTY &&
+//       abs(state[currY + dir][currX + 1]) == PAWN) {
+//     return true;
+//   }
+//
+//   // Checking knights
+//   if (currY + 1 <= CHESS_SIDE - 1 &&
+//       currX + 2 <= CHESS_SIDE - 1 &&
+//       state[currY + 1][currX + 2]*thisPiece < EMPTY &&
+//       abs(state[currY + 1][currX + 2]) == KNIGHT) {
+//     return true;
+//   }
+//   if (currY + 1 <= CHESS_SIDE - 1 && currX - 2 >= 0 &&
+//       state[currY + 1][currX - 2]*thisPiece < EMPTY &&
+//       abs(state[currY + 1][currX - 2]) == KNIGHT) {
+//     return true;
+//   }
+//   if (currY - 1 >= 0 && currX + 2 <= CHESS_SIDE - 1 &&
+//       state[currY - 1][currX + 2]*thisPiece < EMPTY &&
+//       abs(state[currY - 1][currX + 2]) == KNIGHT) {
+//     return true;
+//   }
+//   if (currY - 1 >= 0 && currX - 2 <= 0 &&
+//       state[currY - 1][currX + 2]*thisPiece < EMPTY &&
+//       abs(state[currY - 1][currX + 2]) == KNIGHT) {
+//     return true;
+//   }
+//   if (currY + 2 <= CHESS_SIDE - 1 &&
+//       currX + 1 <= CHESS_SIDE - 1 &&
+//       state[currY + 2][currX + 1]*thisPiece < EMPTY &&
+//       abs(state[currY + 2][currX + 1]) == KNIGHT) {
+//     return true;
+//   }
+//   if (currY + 2 <= CHESS_SIDE - 1 && currX - 1 >= 0 &&
+//       state[currY + 2][currX - 1]*thisPiece < EMPTY &&
+//       abs(state[currY + 2][currX - 1]) == KNIGHT) {
+//     return true;
+//   }
+//   if (currY - 2 >= 0 && currX + 1 <= CHESS_SIDE - 1 &&
+//       state[currY - 2][currX + 1]*thisPiece < EMPTY &&
+//       abs(state[currY - 2][currX + 1]) == KNIGHT) {
+//     return true;
+//   }
+//   if (currY - 2 >= 0 && currX - 1 >= 0 &&
+//       state[currY - 2][currX - 1]*thisPiece < EMPTY &&
+//       abs(state[currY - 2][currX - 1]) == KNIGHT) {
+//     return true;
+//   }
+//
+//   // ChecKing (hilarious)
+//   if (currY + 1 <= CHESS_SIDE - 1 &&
+//       currX + 1 <= CHESS_SIDE - 1 &&
+//       state[currY + 1][currX + 1]*thisPiece < EMPTY &&
+//       abs(state[currY + 1][currX + 1]) == KING) {
+//     return true;
+//   }
+//   if (currY + 1 <= CHESS_SIDE - 1 &&
+//       state[currY + 1][currX]*thisPiece < EMPTY &&
+//       abs(state[currY + 1][currX]) == KING) {
+//     return true;
+//   }
+//   if (currX + 1 <= CHESS_SIDE - 1 &&
+//       state[currY][currX + 1]*thisPiece < EMPTY &&
+//       abs(state[currY][currX + 1]) == KING) {
+//     return true;
+//   }
+//   if (currY - 1 >= 0 && currX + 1 <= CHESS_SIDE - 1 &&
+//       state[currY - 1][currX + 1]*thisPiece < EMPTY &&
+//       abs(state[currY - 1][currX + 1]) == KING) {
+//     return true;
+//   }
+//   if (currY + 1 <= CHESS_SIDE - 1 && currX - 1 >= 0 &&
+//       state[currY + 1][currX - 1]*thisPiece < EMPTY &&
+//       abs(state[currY + 1][currX - 1]) == KING) {
+//     return true;
+//   }
+//   if (currY - 1 >= 0 && currX - 1 >= 0 &&
+//       state[currY - 1][currX - 1]*thisPiece < EMPTY &&
+//       abs(state[currY - 1][currX - 1]) == KING) {
+//     return true;
+//   }
+//   if (currY - 1 >= 0 &&
+//       state[currY - 1][currX]*thisPiece < EMPTY &&
+//       abs(state[currY - 1][currX]) == KING) {
+//     return true;
+//   }
+//   if (currX - 1 >= 0 &&
+//       state[currY][currX - 1]*thisPiece < EMPTY &&
+//       abs(state[currY][currX - 1]) == KING) {
+//     return true;
+//   }
+//
+//   // Checking the straight lines
+//   for (int i = 1; currX + i <= CHESS_SIDE - 1; i++) {
+//     if (state[currY][currX + i]*thisPiece > EMPTY) {
+//       break;
+//     }
+//     else if (state[currY][currX + i]*thisPiece < EMPTY) {
+//       if (abs(state[currY][currX + i]) == ROOK ||
+//           abs(state[currY][currX + i]) == QUEEN) {
+//         return true;
+//       }
+//       else {
+//         break;
+//       }
+//     }
+//   }
+//
+//   for (int i = 1; currX - i >= 0; i++) {
+//     if (state[currY][currX - i]*thisPiece > EMPTY) {
+//       break;
+//     }
+//     else if (state[currY][currX - i]*thisPiece < EMPTY) {
+//       if (abs(state[currY][currX - i]) == ROOK ||
+//           abs(state[currY][currX - i]) == QUEEN) {
+//         return true;
+//       }
+//       else {
+//         break;
+//       }
+//     }
+//   }
+//
+//   for (int i = 1; currY + i <= CHESS_SIDE - 1; i++) {
+//     if (state[currY + i][currX]*thisPiece > EMPTY) {
+//       break;
+//     }
+//     else if (state[currY + i][currX]*thisPiece < EMPTY) {
+//       if (abs(state[currY + i][currX]) == ROOK ||
+//           abs(state[currY + i][currX]) == QUEEN) {
+//         return true;
+//       }
+//       else {
+//         break;
+//       }
+//     }
+//   }
+//   
+//   for (int i = 1; currY - i >= 0; i++) {
+//     if (state[currY - i][currX]*thisPiece > EMPTY) {
+//       break;
+//     }
+//     else if (state[currY - i][currX]*thisPiece < EMPTY) {
+//       if (abs(state[currY - i][currX]) == ROOK ||
+//           abs(state[currY - i][currX]) == QUEEN) {
+//         return true;
+//       }
+//       else {
+//         break;
+//       }
+//     }
+//   }
+//
+//   // Checking the diagonals
+//   for (int i = 1; currX + i <= CHESS_SIDE - 1 && currY + i <= CHESS_SIDE - 1; i++) {
+//     if (state[currY + i][currX + i]*thisPiece > EMPTY) {
+//       break;
+//     }
+//     else if (state[currY + i][currX + i]*thisPiece < EMPTY) {
+//       if (abs(state[currY + i][currX + i]) == BISHOP ||
+//           abs(state[currY + i][currX + i]) == QUEEN) {
+//         return true;
+//       }
+//       else {
+//         break;
+//       }
+//     }
+//   }
+//
+//   for (int i = 1; currX - i >= 0 && currY + i <= CHESS_SIDE - 1; i++) {
+//     if (state[currY + i][currX - i]*thisPiece > EMPTY) {
+//       break;
+//     }
+//     else if (state[currY + i][currX - i]*thisPiece < EMPTY) {
+//       if (abs(state[currY + i][currX - i]) == BISHOP ||
+//           abs(state[currY + i][currX - i]) == QUEEN) {
+//         return true;
+//       }
+//       else {
+//         break;
+//       }
+//     }
+//   }
+//
+//   for (int i = 1; currX + i <= CHESS_SIDE - 1 && currY - i >= 0; i++) {
+//     if (state[currY - i][currX + i]*thisPiece > EMPTY) {
+//       break;
+//     }
+//     else if (state[currY - i][currX + i]*thisPiece < EMPTY) {
+//       if (abs(state[currY - i][currX + i]) == BISHOP ||
+//           abs(state[currY - i][currX + i]) == QUEEN) {
+//         return true;
+//       }
+//       else {
+//         break;
+//       }
+//     }
+//   }
+//
+//   for (int i = 1; currX - i >= 0 && currY - i >= 0; i++) {
+//     if (state[currY - i][currX - i]*thisPiece > EMPTY) {
+//       break;
+//     }
+//     else if (state[currY - i][currX - i]*thisPiece < EMPTY) {
+//       if (abs(state[currY - i][currX - i]) == BISHOP ||
+//           abs(state[currY - i][currX - i]) == QUEEN) {
+//         return true;
+//       }
+//       else {
+//         break;
+//       }
+//     }
+//   }
+//
+//   return false;
+//
+// }
 
 bool King::makeMove(int state[CHESS_SIDE][CHESS_SIDE], int mouseX, int mouseY) {
   vector<tuple<int, int>> validSquares = this->getValidSquares(state);
@@ -367,7 +369,8 @@ bool King::makeMove(int state[CHESS_SIDE][CHESS_SIDE], int mouseX, int mouseY) {
       if (squareX - currX == 2) {
         if (isWhite) {
           for (int i = 0; i < wPiecesArr.size(); i++) {
-            if (wPiecesArr[i]->getSquareX() == 0) {
+            if (wPiecesArr[i]->getSquareX() == 0 &&
+                wPiecesArr[i]->getSquareY() == currY) {
               currRook = wPiecesArr[i];
               break;
             }
@@ -376,7 +379,8 @@ bool King::makeMove(int state[CHESS_SIDE][CHESS_SIDE], int mouseX, int mouseY) {
         }
         else {
           for (int i = 0; i < bPiecesArr.size(); i++) {
-            if (bPiecesArr[i]->getSquareX() == 0) {
+            if (bPiecesArr[i]->getSquareX() == 0 &&
+                bPiecesArr[i]->getSquareY() == currY) {
               currRook = bPiecesArr[i];
               break;
             }
@@ -393,7 +397,8 @@ bool King::makeMove(int state[CHESS_SIDE][CHESS_SIDE], int mouseX, int mouseY) {
       else if (currX - squareX == 2) {
         if (isWhite) {
           for (int i = 0; i < wPiecesArr.size(); i++) {
-            if (wPiecesArr[i]->getSquareX() == 7) {
+            if (wPiecesArr[i]->getSquareX() == 7 &&
+                wPiecesArr[i]->getSquareY() == currY) {
               currRook = wPiecesArr[i];
               break;
             }
@@ -402,7 +407,8 @@ bool King::makeMove(int state[CHESS_SIDE][CHESS_SIDE], int mouseX, int mouseY) {
         }
         else {
           for (int i = 0; i < bPiecesArr.size(); i++) {
-            if (bPiecesArr[i]->getSquareX() == 7) {
+            if (bPiecesArr[i]->getSquareX() == 7 &&
+                bPiecesArr[i]->getSquareY() == currY) {
               currRook = bPiecesArr[i];
               break;
             }

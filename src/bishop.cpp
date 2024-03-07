@@ -23,7 +23,8 @@ vector<tuple<int, int>> Bishop::getValidSquares(int state[CHESS_SIDE][CHESS_SIDE
 
   for (int i = 1; squareX + i <= CHESS_SIDE - 1 && squareY + i <= CHESS_SIDE - 1; i++) {
     if (state[squareY + i][squareX + i]*thisPiece <= EMPTY) {
-      if (abs(state[squareY + i][squareX + i]) != KING) {
+      if (abs(state[squareY + i][squareX + i]) != KING &&
+          !kingInCheck(state, squareX + i, squareY + i, squareX, squareY, false)) {
         validSquares.push_back(make_tuple(squareX + i, squareY + i));
       }
       if (state[squareY + i][squareX + i]*thisPiece < EMPTY) {
@@ -37,7 +38,8 @@ vector<tuple<int, int>> Bishop::getValidSquares(int state[CHESS_SIDE][CHESS_SIDE
 
   for (int i = 1; squareX - i >= 0 && squareY + i <= CHESS_SIDE - 1; i++) {
     if (state[squareY + i][squareX - i]*thisPiece <= EMPTY) {
-      if (abs(state[squareY + i][squareX - i]) != KING) {
+      if (abs(state[squareY + i][squareX - i]) != KING &&
+          !kingInCheck(state, squareX - i, squareY + i, squareX, squareY, false)) {
         validSquares.push_back(make_tuple(squareX - i, squareY + i));
       }
       if (state[squareY + i][squareX - i]*thisPiece < EMPTY) {
@@ -51,7 +53,8 @@ vector<tuple<int, int>> Bishop::getValidSquares(int state[CHESS_SIDE][CHESS_SIDE
 
   for (int i = 1; squareX + i <= CHESS_SIDE - 1 && squareY - i >= 0; i++) {
     if (state[squareY - i][squareX + i]*thisPiece <= EMPTY) {
-      if (abs(state[squareY - i][squareX + i]) != KING) {
+      if (abs(state[squareY - i][squareX + i]) != KING &&
+          !kingInCheck(state, squareX + i, squareY - i, squareX, squareY, false)) {
         validSquares.push_back(make_tuple(squareX + i, squareY - i));
       }
       if (state[squareY - i][squareX + i]*thisPiece < EMPTY) {
@@ -65,7 +68,8 @@ vector<tuple<int, int>> Bishop::getValidSquares(int state[CHESS_SIDE][CHESS_SIDE
 
   for (int i = 1; squareX - i >= 0 && squareY - i >= 0; i++) {
     if (state[squareY - i][squareX - i]*thisPiece <= EMPTY) {
-      if (abs(state[squareY - i][squareX - i]) != KING) {
+      if (abs(state[squareY - i][squareX - i]) != KING &&
+          !kingInCheck(state, squareX - i, squareY - i, squareX, squareY, false)) {
         validSquares.push_back(make_tuple(squareX - i, squareY - i));
       }
       if (state[squareY - i][squareX - i]*thisPiece < EMPTY) {

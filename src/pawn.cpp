@@ -49,30 +49,35 @@ vector<tuple<int, int>> Pawn::getValidSquares(int state[CHESS_SIDE][CHESS_SIDE])
   // Moving up 1 square
   if (0 <= squareY + dir && squareY + dir <= CHESS_SIDE - 1 &&
       0 <= squareX && squareX <= CHESS_SIDE - 1 &&
-      state[squareY + dir][squareX] == EMPTY) {
+      state[squareY + dir][squareX] == EMPTY &&
+      !kingInCheck(state, squareX, squareY + dir, squareX, squareY, false)) {
     validSquares.push_back(make_tuple(squareX, squareY + dir));
   }
   // Moving up 2 squares (if the pawn hasn't moved yet)
   if (0 <= squareY + 2*dir && squareY + 2*dir <= CHESS_SIDE - 1 && 
       0 <= squareX && squareX <= CHESS_SIDE - 1 && !hasMoved && 
-      state[squareY + 2*dir][squareX] == EMPTY) {
+      state[squareY + 2*dir][squareX] == EMPTY &&
+      !kingInCheck(state, squareX, squareY + 2*dir, squareX, squareY, false)) {
     validSquares.push_back(make_tuple(squareX, squareY + 2*dir));
   }
   // Capturing diagionally (if there are pieces to be captured)
   if (0 <= squareY + dir && squareY + dir <= CHESS_SIDE - 1 &&
       0 <= squareX - 1 && squareX - 1 <= CHESS_SIDE - 1 &&
       state[squareY + dir][squareX - 1]*dir > EMPTY &&
-      abs(state[squareY + dir][squareX - 1]) != KING) {
+      abs(state[squareY + dir][squareX - 1]) != KING &&
+      !kingInCheck(state, squareX - 1, squareY + dir, squareX, squareY, false)) {
     validSquares.push_back(make_tuple(squareX - 1, squareY + dir));
   }
   if (0 <= squareY + dir && squareY + dir <= CHESS_SIDE - 1 &&
       0 <= squareX + 1 && squareX + 1 <= CHESS_SIDE - 1 &&
       state[squareY + dir][squareX + 1]*dir > EMPTY &&
-      abs(state[squareY + dir][squareX + 1]) != KING) {
+      abs(state[squareY + dir][squareX + 1]) != KING &&
+      !kingInCheck(state, squareX + 1, squareY + dir, squareX, squareY, false)) {
     validSquares.push_back(make_tuple(squareX + 1, squareY + dir));
   }
   // En passant: *TO BE IMPLEMENTED*
-  if (enPassantAble) {
+  if (enPassantAble &&
+      !kingInCheck(state, squareX + enPassantNum, squareY + dir, squareX, squareY, true)) {
     validSquares.push_back(make_tuple(squareX + enPassantNum, squareY + dir));
   }
   

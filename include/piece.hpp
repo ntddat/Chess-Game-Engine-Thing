@@ -71,6 +71,10 @@ class Piece {
     static void capturePiece(vector<shared_ptr<Piece>> arr, int capturedX, int captureY);
 
     static void changeState(int state[8][8], int squareX, int squareY, int currX, int currY, bool isWhite);
+   
+    static bool squareIsDefended(int state[8][8], int currX, int currY, int squareX, int squareY);
+
+    static bool kingInCheck(int state[8][8], int currX, int currY, int squareX, int squareY, bool enPassant);
 };
 
 #endif
