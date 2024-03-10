@@ -43,6 +43,15 @@ using namespace std;
 #define BLACK -1
 #define WHITE 1
 
+#define NOTYET -3
+#define WHITE_RESIGNED -2
+#define WHITE_CHECKMATED -1
+#define DRAW 0
+#define BLACK_CHECKMATED 1
+#define BLACK_RESIGNED 2
+
+#define FIFTY_MOVE 100  // lmao
+
 #define CASTLE_LONG -20
 #define CASTLE_SHORT -30
 
@@ -71,6 +80,7 @@ using namespace std;
 void initPieces(SDL_Renderer *&renderer);
 void renderPieces(SDL_Renderer *&renderer, shared_ptr<Piece> movePiece);
 void reset(SDL_Renderer *&renderer, int state[CHESS_SIDE][CHESS_SIDE], int startingState[CHESS_SIDE][CHESS_SIDE], bool *isWhiteTurn);
+bool isCheckmate(int state[CHESS_SIDE][CHESS_SIDE], bool isWhiteTurn);
 
 int main() {
   SDL_Window *window;
@@ -128,11 +138,19 @@ int main() {
   TTF_Font *font = TTF_OpenFont("../font/RobotoMonoNerdFontMono-Bold.ttf", 32);
   TextRect instructionsMenu1(renderer, font, "Press 1 for 2-Player Mode", 765, 200);
   TextRect instructionsMenu2(renderer, font, "Press 2 to play an engine", 765, 320);
+  TextRect drawOption(renderer, font, "Press D to agree to a draw", 755, 50);
+  TextRect whiteResignOption(renderer, font, "Press W to resign as white", 755, 100);
+  TextRect blackResignOption(renderer, font, "Press B to resign as black", 755, 150);
   TextRect instructionsExit(renderer, font, "Press 0 to go back to menu", 755, 200);
   TextRect promotionKnight(renderer, font, "Press 1 to promote to Knight", 735, 250);
   TextRect promotionBishop(renderer, font, "Press 2 to promote to Bishop", 735, 300);
   TextRect promotionRook(renderer, font, "Press 3 to promote to Rook", 735, 350);
   TextRect promotionQueen(renderer, font, "Press 4 to promote to Queen", 735, 400);
+  TextRect whiteCheckmated(renderer, font, "Checkmate! Black has won!", 765, 450);
+  TextRect blackCheckmated(renderer, font, "Checkmate! White has won!", 765, 450);
+  TextRect whiteResigned(renderer, font, "White resigns! Black wins!", 760, 450);
+  TextRect blackResigned(renderer, font, "Black resigns! White wins!", 760, 450);
+  TextRect gameDrawn(renderer, font, "It's a draw! No one wins!", 760, 450);
 
   // Game loop
   bool gameRunning = true;
@@ -147,9 +165,11 @@ int main() {
   vector<SDL_Rect> validMovesRects;
   int currLevel = MENU;
   bool isWhiteTurn = true;
+  int gameEnds = NOTYET;
   bool isPromotion = false;
   shared_ptr<Piece> promotionPawn = NULL;
   int promoteTo = EMPTY;
+  int fiftyMoveCheck = 0;
   while (gameRunning) {
     SDL_GetMouseState(&mouseX, &mouseY);
 
@@ -168,7 +188,21 @@ int main() {
         }
         if (currLevel != MENU && event.key.keysym.sym == SDLK_0) {
           currLevel = MENU;
+          gameEnds = NOTYET;
           reset(renderer, state, startingState, &isWhiteTurn);
+        }
+        if (currLevel != MENU && gameEnds == NOTYET) {
+          switch (event.key.keysym.sym) {
+            case SDLK_d:
+              gameEnds = DRAW;
+              break;
+            case SDLK_w:
+              gameEnds = WHITE_RESIGNED;
+              break;
+            case SDLK_b:
+              gameEnds = BLACK_RESIGNED;
+              break;
+          }
         }
         if (currLevel != MENU && isPromotion && promoteTo == EMPTY) {
           switch (event.key.keysym.sym) {
@@ -219,12 +253,32 @@ int main() {
     }
     else {
       SDL_SetRenderDrawColor(renderer, 255, 255, 255, 0);
+      if (gameEnds == NOTYET) {
+        drawOption.render(renderer);
+        whiteResignOption.render(renderer);
+        blackResignOption.render(renderer);
+      }
       instructionsExit.render(renderer);
       if (isPromotion && promoteTo == EMPTY) {
         promotionKnight.render(renderer);
         promotionBishop.render(renderer);
         promotionRook.render(renderer);
         promotionQueen.render(renderer);
+      }
+      if (gameEnds == WHITE_RESIGNED) {
+        whiteResigned.render(renderer);
+      }
+      else if (gameEnds == WHITE_CHECKMATED) {
+        whiteCheckmated.render(renderer);
+      }
+      else if (gameEnds == DRAW) {
+        gameDrawn.render(renderer);
+      }
+      else if (gameEnds == BLACK_CHECKMATED) {
+        blackCheckmated.render(renderer);
+      }
+      else if (gameEnds == BLACK_RESIGNED) {
+        blackResigned.render(renderer);
       }
       SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
     }
@@ -233,53 +287,55 @@ int main() {
 
     /* LOGIC */ 
     if (currLevel != MENU) {
-      if (isWhiteTurn) {
-        for (int i = 0; i < Piece::wPiecesArr.size() && currPiece == NULL; i++) {
-          if (Piece::wPiecesArr[i]->getIsAlive() &&
-              Piece::wPiecesArr[i]->getTRect()->getXValue() <= mouseX && 
-              mouseX <= (Piece::wPiecesArr[i]->getTRect()->getXValue() + PIECE_SIDE) &&
-              Piece::wPiecesArr[i]->getTRect()->getYValue() <= mouseY && 
-              mouseY <= (Piece::wPiecesArr[i]->getTRect()->getYValue() + PIECE_SIDE)) {
-            currPiece = Piece::wPiecesArr[i];
-            originalX = currPiece->getTRect()->getXValue();
-            originalY = currPiece->getTRect()->getYValue();
+      if (gameEnds == NOTYET) {
+        if (isWhiteTurn) {
+          for (int i = 0; i < Piece::wPiecesArr.size() && currPiece == NULL; i++) {
+            if (Piece::wPiecesArr[i]->getIsAlive() &&
+                Piece::wPiecesArr[i]->getTRect()->getXValue() <= mouseX && 
+                mouseX <= (Piece::wPiecesArr[i]->getTRect()->getXValue() + PIECE_SIDE) &&
+                Piece::wPiecesArr[i]->getTRect()->getYValue() <= mouseY && 
+                mouseY <= (Piece::wPiecesArr[i]->getTRect()->getYValue() + PIECE_SIDE)) {
+              currPiece = Piece::wPiecesArr[i];
+              originalX = currPiece->getTRect()->getXValue();
+              originalY = currPiece->getTRect()->getYValue();
+            }
           }
-        }
 
-        for (int i = 0; i < Piece::wPArr.size() && currPiece == NULL; i++) {
-          if (Piece::wPArr[i]->getIsAlive() &&
-              Piece::wPArr[i]->getTRect()->getXValue() <= mouseX && 
-              mouseX <= (Piece::wPArr[i]->getTRect()->getXValue() + PIECE_SIDE) &&
-              Piece::wPArr[i]->getTRect()->getYValue() <= mouseY && 
-              mouseY <= (Piece::wPArr[i]->getTRect()->getYValue() + PIECE_SIDE)) {
-            currPiece = Piece::wPArr[i];
-            originalX = currPiece->getTRect()->getXValue();
-            originalY = currPiece->getTRect()->getYValue();
+          for (int i = 0; i < Piece::wPArr.size() && currPiece == NULL; i++) {
+            if (Piece::wPArr[i]->getIsAlive() &&
+                Piece::wPArr[i]->getTRect()->getXValue() <= mouseX && 
+                mouseX <= (Piece::wPArr[i]->getTRect()->getXValue() + PIECE_SIDE) &&
+                Piece::wPArr[i]->getTRect()->getYValue() <= mouseY && 
+                mouseY <= (Piece::wPArr[i]->getTRect()->getYValue() + PIECE_SIDE)) {
+              currPiece = Piece::wPArr[i];
+              originalX = currPiece->getTRect()->getXValue();
+              originalY = currPiece->getTRect()->getYValue();
+            }
           }
         }
-      }
-      else {
-        for (int i = 0; i < Piece::bPiecesArr.size() && currPiece == NULL; i++) {
-          if (Piece::bPiecesArr[i]->getIsAlive() &&
-              Piece::bPiecesArr[i]->getTRect()->getXValue() <= mouseX && 
-              mouseX <= (Piece::bPiecesArr[i]->getTRect()->getXValue() + PIECE_SIDE) &&
-              Piece::bPiecesArr[i]->getTRect()->getYValue() <= mouseY && 
-              mouseY <= (Piece::bPiecesArr[i]->getTRect()->getYValue() + PIECE_SIDE)) {
-            currPiece = Piece::bPiecesArr[i];
-            originalX = currPiece->getTRect()->getXValue();
-            originalY = currPiece->getTRect()->getYValue();
+        else {
+          for (int i = 0; i < Piece::bPiecesArr.size() && currPiece == NULL; i++) {
+            if (Piece::bPiecesArr[i]->getIsAlive() &&
+                Piece::bPiecesArr[i]->getTRect()->getXValue() <= mouseX && 
+                mouseX <= (Piece::bPiecesArr[i]->getTRect()->getXValue() + PIECE_SIDE) &&
+                Piece::bPiecesArr[i]->getTRect()->getYValue() <= mouseY && 
+                mouseY <= (Piece::bPiecesArr[i]->getTRect()->getYValue() + PIECE_SIDE)) {
+              currPiece = Piece::bPiecesArr[i];
+              originalX = currPiece->getTRect()->getXValue();
+              originalY = currPiece->getTRect()->getYValue();
+            }
           }
-        }
-        
-        for (int i = 0; i < Piece::bPArr.size() && currPiece == NULL; i++) {
-          if (Piece::bPArr[i]->getIsAlive() &&
-              Piece::bPArr[i]->getTRect()->getXValue() <= mouseX && 
-              mouseX <= (Piece::bPArr[i]->getTRect()->getXValue() + PIECE_SIDE) &&
-              Piece::bPArr[i]->getTRect()->getYValue() <= mouseY && 
-              mouseY <= (Piece::bPArr[i]->getTRect()->getYValue() + PIECE_SIDE)) {
-            currPiece = Piece::bPArr[i];
-            originalX = currPiece->getTRect()->getXValue();
-            originalY = currPiece->getTRect()->getYValue();
+          
+          for (int i = 0; i < Piece::bPArr.size() && currPiece == NULL; i++) {
+            if (Piece::bPArr[i]->getIsAlive() &&
+                Piece::bPArr[i]->getTRect()->getXValue() <= mouseX && 
+                mouseX <= (Piece::bPArr[i]->getTRect()->getXValue() + PIECE_SIDE) &&
+                Piece::bPArr[i]->getTRect()->getYValue() <= mouseY && 
+                mouseY <= (Piece::bPArr[i]->getTRect()->getYValue() + PIECE_SIDE)) {
+              currPiece = Piece::bPArr[i];
+              originalX = currPiece->getTRect()->getXValue();
+              originalY = currPiece->getTRect()->getYValue();
+            }
           }
         }
       }
@@ -347,6 +403,19 @@ int main() {
         promoteTo = EMPTY;
       }
 
+      if (isCheckmate(state, isWhiteTurn)) {
+        if (isWhiteTurn) {
+          gameEnds = WHITE_CHECKMATED;  
+        }
+        else {
+          gameEnds = BLACK_CHECKMATED;
+        }
+      }
+
+      if (fiftyMoveCheck == FIFTY_MOVE) {
+        gameEnds = DRAW;
+      }
+
       if (leftMBPressed && currPiece != NULL && !isPromotion) {
         movePiece = currPiece;
         movePiece->getTRect()->setCoordinates(mouseX - PIECE_SIDE/2, mouseY - PIECE_SIDE/2);
@@ -377,7 +446,7 @@ int main() {
       if (!leftMBPressed) {
         if (movePiece != NULL) {
           int newX, newY;
-          if (mouseX < 720 && movePiece->makeMove(state, mouseX, mouseY)) {
+          if (mouseX < 720 && movePiece->makeMove(state, mouseX, mouseY, &fiftyMoveCheck)) {
             if (abs(state[movePiece->getSquareY()][movePiece->getSquareX()]) == PAWN &&
                 (movePiece->getSquareY() == 0 || movePiece->getSquareY() == 7))  {
               isPromotion = true;
@@ -505,4 +574,57 @@ void reset(SDL_Renderer *&renderer, int state[CHESS_SIDE][CHESS_SIDE], int start
     }
   }
 
+}
+
+bool isCheckmate(int state[CHESS_SIDE][CHESS_SIDE], bool isWhiteTurn) {
+  if (isWhiteTurn) {
+    for (int i = 0; i < Piece::wPArr.size(); i++) {
+      if (!Piece::wPArr[i]->getIsAlive()) {
+        continue;
+      }
+      vector<tuple<int, int>> validMoves = Piece::wPArr[i]->getValidSquares(state);
+      // cout << validMoves.size() << " ";
+      if (!validMoves.empty()) {
+        return false;
+      }
+    }
+    for (int i = 0; i < Piece::wPiecesArr.size(); i++) {
+      if (!Piece::wPiecesArr[i]->getIsAlive()) {
+        continue;
+      }
+      vector<tuple<int, int>> validMoves = Piece::wPiecesArr[i]->getValidSquares(state);
+      // cout << validMoves.size() << " ";
+      if (!validMoves.empty()) {
+        return false;
+      }
+    }
+    // cout << endl;
+  }
+  else {
+    for (int i = 0; i < Piece::bPArr.size(); i++) {
+      if (!Piece::bPArr[i]->getIsAlive()) {
+        continue;
+      }
+      vector<tuple<int, int>> validMoves = Piece::bPArr[i]->getValidSquares(state);
+      // cout << validMoves.size() << " ";
+      if (!validMoves.empty()) {
+        return false;
+      }
+    }
+    for (int i = 0; i < Piece::bPiecesArr.size(); i++) {
+      if (!Piece::bPiecesArr[i]->getIsAlive()) {
+        continue;
+      }
+      vector<tuple<int, int>> validMoves = Piece::bPiecesArr[i]->getValidSquares(state);
+      // cout << validMoves.size() << " ";
+      if (!validMoves.empty()) {
+        return false;
+      }
+    }
+    // cout << endl;
+
+  }
+  // cout << "here\n";
+
+  return true;
 }

@@ -56,6 +56,7 @@ vector<tuple<int, int>> Pawn::getValidSquares(int state[CHESS_SIDE][CHESS_SIDE])
   // Moving up 2 squares (if the pawn hasn't moved yet)
   if (0 <= squareY + 2*dir && squareY + 2*dir <= CHESS_SIDE - 1 && 
       0 <= squareX && squareX <= CHESS_SIDE - 1 && !hasMoved && 
+      state[squareY + dir][squareX] == EMPTY &&
       state[squareY + 2*dir][squareX] == EMPTY &&
       !kingInCheck(state, squareX, squareY + 2*dir, squareX, squareY, false)) {
     validSquares.push_back(make_tuple(squareX, squareY + 2*dir));
@@ -84,7 +85,7 @@ vector<tuple<int, int>> Pawn::getValidSquares(int state[CHESS_SIDE][CHESS_SIDE])
   return validSquares;
 }
 
-bool Pawn::makeMove(int state[CHESS_SIDE][CHESS_SIDE], int mouseX, int mouseY) {
+bool Pawn::makeMove(int state[CHESS_SIDE][CHESS_SIDE], int mouseX, int mouseY, int *fiftyMoveCheck) {
   vector<tuple<int, int>> validSquares = this->getValidSquares(state);
   int dir;
   if (isWhite) {dir = NEG;}
@@ -132,7 +133,8 @@ bool Pawn::makeMove(int state[CHESS_SIDE][CHESS_SIDE], int mouseX, int mouseY) {
         }
       }
       
-      changeState(state, squareX, squareY, currX, currY, isWhite);
+      changeState(state, squareX, squareY, currX, currY, isWhite, fiftyMoveCheck);
+      *fiftyMoveCheck = 0;
 
       squareX = currX;
       squareY = currY;

@@ -69,7 +69,7 @@ vector<tuple<int, int>> Rook::getValidSquares(int state[CHESS_SIDE][CHESS_SIDE])
   for (int i = 1; squareY - i >= 0; i++) {
     if (state[squareY - i][squareX]*thisPiece <= EMPTY) {
       if (abs(state[squareY - i][squareX]) != KING &&
-          !kingInCheck(state, squareX, squareY - 1, squareX, squareY, false)) {
+          !kingInCheck(state, squareX, squareY - i, squareX, squareY, false)) {
         validSquares.push_back(make_tuple(squareX, squareY - i));
       }
       if (state[squareY - i][squareX]*thisPiece < EMPTY) {
@@ -84,7 +84,7 @@ vector<tuple<int, int>> Rook::getValidSquares(int state[CHESS_SIDE][CHESS_SIDE])
   return validSquares;
 }
 
-bool Rook::makeMove(int state[CHESS_SIDE][CHESS_SIDE], int mouseX, int mouseY) {
+bool Rook::makeMove(int state[CHESS_SIDE][CHESS_SIDE], int mouseX, int mouseY, int *fiftyMoveCheck) {
   vector<tuple<int, int>> validSquares = this->getValidSquares(state);
   for (int i = 0; i < validSquares.size(); i++) {
     int currX = get<0>(validSquares[i]);
@@ -131,7 +131,7 @@ bool Rook::makeMove(int state[CHESS_SIDE][CHESS_SIDE], int mouseX, int mouseY) {
         }
         hasMoved = true;
       }
-      changeState(state, squareX, squareY, currX, currY, isWhite);
+      changeState(state, squareX, squareY, currX, currY, isWhite, fiftyMoveCheck);
 
       squareX = currX;
       squareY = currY;

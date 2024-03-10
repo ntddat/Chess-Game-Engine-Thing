@@ -64,13 +64,13 @@ class Piece {
 
     static void renderPieces(SDL_Renderer *&renderer, shared_ptr<Piece> movePiece);
 
-    virtual bool makeMove(int state[8][8], int mouseX, int mouseY);
+    virtual bool makeMove(int state[8][8], int mouseX, int mouseY, int *fiftyMoveCheck);
 
     static void squareSwap(int state[8][8], int srcX, int srcY, int dstX, int dstY);
 
     static void capturePiece(vector<shared_ptr<Piece>> arr, int capturedX, int captureY);
 
-    static void changeState(int state[8][8], int squareX, int squareY, int currX, int currY, bool isWhite);
+    static void changeState(int state[8][8], int squareX, int squareY, int currX, int currY, bool isWhite, int *fiftyMoveCheck);
    
     static bool squareIsDefended(int state[8][8], int currX, int currY, int squareX, int squareY);
 

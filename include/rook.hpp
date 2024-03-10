@@ -22,7 +22,7 @@ class Rook: public Piece {
 
     vector<tuple<int, int>> getValidSquares(int state[8][8]);
 
-    bool makeMove(int state[8][8], int mouseX, int mouseY);
+    bool makeMove(int state[8][8], int mouseX, int mouseY, int *fiftyMoveCheck);
 };
 
 #endif

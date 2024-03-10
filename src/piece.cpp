@@ -150,7 +150,7 @@ void Piece::renderPieces(SDL_Renderer *&renderer, shared_ptr<Piece> movePiece) {
 }
 
 
-bool Piece::makeMove(int state[CHESS_SIDE][CHESS_SIDE], int mouseX, int mouseY) {
+bool Piece::makeMove(int state[CHESS_SIDE][CHESS_SIDE], int mouseX, int mouseY, int *fiftyMoveCheck) {
 
 }
 
@@ -169,11 +169,12 @@ void Piece::capturePiece(vector<shared_ptr<Piece>> arr, int captureX, int captur
   }
 }
 
-void Piece::changeState(int state[CHESS_SIDE][CHESS_SIDE], int squareX, int squareY, int currX, int currY, bool isWhite) {
+void Piece::changeState(int state[CHESS_SIDE][CHESS_SIDE], int squareX, int squareY, int currX, int currY, bool isWhite, int *fiftyMoveCheck) {
 
     // Moved to an empty square
     if (state[currY][currX] == 0) {
       squareSwap(state, squareX, squareY, currX, currY);
+      *fiftyMoveCheck += 1;
     }
     // Captured an enemy piece (doesn't include en passant)
     else {
@@ -195,6 +196,7 @@ void Piece::changeState(int state[CHESS_SIDE][CHESS_SIDE], int squareX, int squa
       }
       state[currY][currX] = state[squareY][squareX];
       state[squareY][squareX] = EMPTY;
+      *fiftyMoveCheck = 0;
     }
 }
 
