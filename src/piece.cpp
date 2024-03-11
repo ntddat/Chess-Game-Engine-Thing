@@ -2,6 +2,7 @@
 #include <memory>
 #include <vector>
 #include <tuple>
+#include <map>
 #include <SDL2/SDL.h>
 
 #include "../include/textured_rect.hpp"
@@ -150,7 +151,7 @@ void Piece::renderPieces(SDL_Renderer *&renderer, shared_ptr<Piece> movePiece) {
 }
 
 
-bool Piece::makeMove(int state[CHESS_SIDE][CHESS_SIDE], int mouseX, int mouseY, int *fiftyMoveCheck) {
+bool Piece::makeMove(int state[CHESS_SIDE][CHESS_SIDE], int mouseX, int mouseY, int *fiftyMoveCheck, map<string, int> pastStates) {
 
 }
 
@@ -169,35 +170,52 @@ void Piece::capturePiece(vector<shared_ptr<Piece>> arr, int captureX, int captur
   }
 }
 
-void Piece::changeState(int state[CHESS_SIDE][CHESS_SIDE], int squareX, int squareY, int currX, int currY, bool isWhite, int *fiftyMoveCheck) {
+void Piece::changeState(int state[CHESS_SIDE][CHESS_SIDE], int squareX, int squareY, int currX, int currY, bool isWhite, int *fiftyMoveCheck, map<string, int> pastStates) {
 
-    // Moved to an empty square
-    if (state[currY][currX] == 0) {
-      squareSwap(state, squareX, squareY, currX, currY);
-      *fiftyMoveCheck += 1;
+  // Turning off en passant for enemy pawns if needed
+  if (isWhite) {
+    for (int i = 0; i < wPArr.size(); i++) {
+      if (wPArr[i]->getEnPassant()) {
+        wPArr[i]->setEnPassant(false, 0);
+      }
     }
-    // Captured an enemy piece (doesn't include en passant)
-    else {
-      if (isWhite) {
-        if (abs(state[currY][currX]) == PAWN) {
-          capturePiece(bPArr, currX, currY);
-        }
-        else {
-          capturePiece(bPiecesArr, currX, currY);
-        }
+  }
+  else {
+    for (int i = 0; i < bPArr.size(); i++) {
+      if (bPArr[i]->getEnPassant()) {
+        bPArr[i]->setEnPassant(false, 0);
+      }
+    }
+  }
+
+  // Moved to an empty square
+  if (state[currY][currX] == 0) {
+    squareSwap(state, squareX, squareY, currX, currY);
+    *fiftyMoveCheck += 1;
+  }
+  // Captured an enemy piece (doesn't include en passant)
+  else {
+    if (isWhite) {
+      if (abs(state[currY][currX]) == PAWN) {
+        capturePiece(bPArr, currX, currY);
       }
       else {
-        if (abs(state[currY][currX]) == PAWN) {
-          capturePiece(wPArr, currX, currY);
-        }
-        else {
-          capturePiece(wPiecesArr, currX, currY);
-        }
+        capturePiece(bPiecesArr, currX, currY);
       }
-      state[currY][currX] = state[squareY][squareX];
-      state[squareY][squareX] = EMPTY;
-      *fiftyMoveCheck = 0;
     }
+    else {
+      if (abs(state[currY][currX]) == PAWN) {
+        capturePiece(wPArr, currX, currY);
+      }
+      else {
+        capturePiece(wPiecesArr, currX, currY);
+      }
+    }
+    state[currY][currX] = state[squareY][squareX];
+    state[squareY][squareX] = EMPTY;
+    *fiftyMoveCheck = 0;
+    pastStates.clear();
+  }
 }
 
 bool Piece::squareIsDefended(int state[CHESS_SIDE][CHESS_SIDE], int currX, int currY, int squareX, int squareY) {

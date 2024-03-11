@@ -5,6 +5,7 @@
 #include <memory>
 #include <vector>
 #include <tuple>
+#include <map>
 #include <SDL2/SDL.h>
 
 #include "../include/textured_rect.hpp"
@@ -64,13 +65,13 @@ class Piece {
 
     static void renderPieces(SDL_Renderer *&renderer, shared_ptr<Piece> movePiece);
 
-    virtual bool makeMove(int state[8][8], int mouseX, int mouseY, int *fiftyMoveCheck);
+    virtual bool makeMove(int state[8][8], int mouseX, int mouseY, int *fiftyMoveCheck, map<string, int> pastStates);
 
     static void squareSwap(int state[8][8], int srcX, int srcY, int dstX, int dstY);
 
     static void capturePiece(vector<shared_ptr<Piece>> arr, int capturedX, int captureY);
 
-    static void changeState(int state[8][8], int squareX, int squareY, int currX, int currY, bool isWhite, int *fiftyMoveCheck);
+    static void changeState(int state[8][8], int squareX, int squareY, int currX, int currY, bool isWhite, int *fiftyMoveCheck, map<string, int> pastStates);
    
     static bool squareIsDefended(int state[8][8], int currX, int currY, int squareX, int squareY);
 

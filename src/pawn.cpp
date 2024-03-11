@@ -85,7 +85,7 @@ vector<tuple<int, int>> Pawn::getValidSquares(int state[CHESS_SIDE][CHESS_SIDE])
   return validSquares;
 }
 
-bool Pawn::makeMove(int state[CHESS_SIDE][CHESS_SIDE], int mouseX, int mouseY, int *fiftyMoveCheck) {
+bool Pawn::makeMove(int state[CHESS_SIDE][CHESS_SIDE], int mouseX, int mouseY, int *fiftyMoveCheck, map<string, int> pastStates) {
   vector<tuple<int, int>> validSquares = this->getValidSquares(state);
   int dir;
   if (isWhite) {dir = NEG;}
@@ -133,8 +133,9 @@ bool Pawn::makeMove(int state[CHESS_SIDE][CHESS_SIDE], int mouseX, int mouseY, i
         }
       }
       
-      changeState(state, squareX, squareY, currX, currY, isWhite, fiftyMoveCheck);
+      changeState(state, squareX, squareY, currX, currY, isWhite, fiftyMoveCheck, pastStates);
       *fiftyMoveCheck = 0;
+      pastStates.clear();
 
       squareX = currX;
       squareY = currY;

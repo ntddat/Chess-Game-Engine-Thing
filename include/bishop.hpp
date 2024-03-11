@@ -19,7 +19,7 @@ class Bishop: public Piece {
 
     vector<tuple<int, int>> getValidSquares(int state[8][8]);
 
-    bool makeMove(int state[8][8], int mouseX, int mouseY, int *fiftyMoveCheck);
+    bool makeMove(int state[8][8], int mouseX, int mouseY, int *fiftyMoveCheck, map<string, int> pastStates);
 };
 
 #endif

@@ -2,10 +2,12 @@
 // g++ chess_game.cpp ./glad/src/glad.c -I./glad/include -o chess_game -lSDL2 
 
 #include <iostream>
+#include <string>
 #include <vector>
 #include <memory>
 #include <vector>
 #include <tuple>
+#include <map>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 
@@ -75,12 +77,11 @@ using namespace std;
  } 
  */
 
-// bool makeMove(int mouseX, int mouseY, int state[CHESS_SIDE][CHESS_SIDE], shared_ptr<Piece> movePiece, int *capturedX, int *capturedY, int *capturedPiece, bool *pawnMovedTwo, bool *isEnPassantNow);
-// void capturePiece(int capturedX, int capturedY, vector<shared_ptr<Piece>> arr);
 void initPieces(SDL_Renderer *&renderer);
 void renderPieces(SDL_Renderer *&renderer, shared_ptr<Piece> movePiece);
 void reset(SDL_Renderer *&renderer, int state[CHESS_SIDE][CHESS_SIDE], int startingState[CHESS_SIDE][CHESS_SIDE], bool *isWhiteTurn);
 bool isCheckmate(int state[CHESS_SIDE][CHESS_SIDE], bool isWhiteTurn);
+string stateToString(int state[CHESS_SIDE][CHESS_SIDE], bool isWhiteTurn);
 
 int main() {
   SDL_Window *window;
@@ -170,6 +171,9 @@ int main() {
   shared_ptr<Piece> promotionPawn = NULL;
   int promoteTo = EMPTY;
   int fiftyMoveCheck = 0;
+  map<string, int> pastStates;
+  pastStates[stateToString(state, false)] = 1;
+  bool newStateAdded = true;
   while (gameRunning) {
     SDL_GetMouseState(&mouseX, &mouseY);
 
@@ -189,6 +193,7 @@ int main() {
         if (currLevel != MENU && event.key.keysym.sym == SDLK_0) {
           currLevel = MENU;
           gameEnds = NOTYET;
+          pastStates.clear();
           reset(renderer, state, startingState, &isWhiteTurn);
         }
         if (currLevel != MENU && gameEnds == NOTYET) {
@@ -403,12 +408,55 @@ int main() {
         promoteTo = EMPTY;
       }
 
-      if (isCheckmate(state, isWhiteTurn)) {
-        if (isWhiteTurn) {
-          gameEnds = WHITE_CHECKMATED;  
+      if (!newStateAdded) {
+        newStateAdded = true;
+        string newState = stateToString(state, isWhiteTurn);
+        if (pastStates.count(newState)) {
+          pastStates[newState] += 1;
         }
         else {
-          gameEnds = BLACK_CHECKMATED;
+          pastStates[newState] = 1;
+        }
+      }
+
+      for (auto pair : pastStates) {
+        if (pastStates[pair.first] == 3) {
+          gameEnds = DRAW;
+          break;
+        }
+      }
+
+      if (isCheckmate(state, isWhiteTurn)) {
+        int kingX, kingY;
+        if (isWhiteTurn) {
+          for (int i = 0; i < Piece::wPiecesArr.size(); i++) {
+            if (state[Piece::wPiecesArr[i]->getSquareY()][Piece::wPiecesArr[i]->getSquareX()] == WHITE*KING) {
+              kingX = Piece::wPiecesArr[i]->getSquareX();
+              kingY = Piece::wPiecesArr[i]->getSquareY();
+              break;
+            }
+          }
+          if (Piece::squareIsDefended(state, kingX, kingY, kingX, kingY)) {
+            gameEnds = WHITE_CHECKMATED;  
+          }
+          else {
+            gameEnds = DRAW;
+          }
+        }
+        else {
+          for (int i = 0; i < Piece::bPiecesArr.size(); i++) {
+            if (state[Piece::bPiecesArr[i]->getSquareY()][Piece::bPiecesArr[i]->getSquareX()] == BLACK*KING) {
+              kingX = Piece::bPiecesArr[i]->getSquareX();
+              kingY = Piece::bPiecesArr[i]->getSquareY();
+              break;
+            }
+          }
+          if (Piece::squareIsDefended(state, kingX, kingY, kingX, kingY)) {
+            gameEnds = BLACK_CHECKMATED;  
+          }
+          else {
+            gameEnds = DRAW;
+          }
         }
       }
 
@@ -446,7 +494,7 @@ int main() {
       if (!leftMBPressed) {
         if (movePiece != NULL) {
           int newX, newY;
-          if (mouseX < 720 && movePiece->makeMove(state, mouseX, mouseY, &fiftyMoveCheck)) {
+          if (mouseX < 720 && movePiece->makeMove(state, mouseX, mouseY, &fiftyMoveCheck, pastStates)) {
             if (abs(state[movePiece->getSquareY()][movePiece->getSquareX()]) == PAWN &&
                 (movePiece->getSquareY() == 0 || movePiece->getSquareY() == 7))  {
               isPromotion = true;
@@ -457,6 +505,9 @@ int main() {
               newY = movePiece->getSquareY()*SQUARE_SIDE;
             }
 
+            // cout << stateToString(state, isWhiteTurn) << endl;
+
+            newStateAdded = false;
             isWhiteTurn = !isWhiteTurn;
           }
           else {
@@ -627,4 +678,95 @@ bool isCheckmate(int state[CHESS_SIDE][CHESS_SIDE], bool isWhiteTurn) {
   // cout << "here\n";
 
   return true;
+}
+
+// Converting the current board state to a specialized FEN string that contains
+// whether each side can castle as well as whether an en passant move is possible
+// ""
+string stateToString(int state[CHESS_SIDE][CHESS_SIDE], bool isWhiteTurn) {
+  string FENstr = "";
+  int empty = 0;
+  for (int i = 0; i < CHESS_SIDE; i++) {
+    for (int j = 0; j < CHESS_SIDE; j++) {
+      if (state[i][j] == EMPTY) {
+        empty += 1;
+      }
+      else {
+        if (empty > 0) {
+          FENstr += to_string(empty);
+          empty = 0;
+        }
+        char pieceLetter;
+        switch (abs(state[i][j])) {
+          case PAWN:
+            pieceLetter = 'p';
+            break;
+          case BISHOP:
+            pieceLetter = 'b';
+            break;
+          case KNIGHT:
+            pieceLetter = 'n';
+            break;
+          case ROOK:
+            pieceLetter = 'r';
+            break;
+          case QUEEN:
+            pieceLetter = 'q';
+            break;
+          case KING:
+            pieceLetter = 'k';
+            break;
+        }
+        if (state[i][j] > EMPTY) {
+          pieceLetter = toupper(pieceLetter);
+        }
+        FENstr += pieceLetter;
+
+      }
+      if (j == CHESS_SIDE - 1) {
+        if (empty > 0) {
+          FENstr += to_string(empty);
+          empty = 0;
+        }
+        FENstr += "/";
+      }
+    }
+  }
+  FENstr += " ";
+  if (isWhiteTurn) {
+    FENstr += "w";
+  }
+  else {
+    FENstr += "b";
+  }
+  FENstr += " ";
+  for (int i = 0; i < Piece::wPiecesArr.size(); i++) {
+    if (state[Piece::wPiecesArr[i]->getSquareY()][Piece::wPiecesArr[i]->getSquareX()] == WHITE*KING) {
+      if (Piece::wPiecesArr[i]->getCastleK()) {FENstr += "K";}
+      if (Piece::wPiecesArr[i]->getCastleQ()) {FENstr += "Q";}
+    }
+  }
+  for (int i = 0; i < Piece::bPiecesArr.size(); i++) {
+    if (state[Piece::bPiecesArr[i]->getSquareY()][Piece::bPiecesArr[i]->getSquareX()] == BLACK*KING) {
+      if (Piece::bPiecesArr[i]->getCastleK()) {FENstr += "k";}
+      if (Piece::bPiecesArr[i]->getCastleQ()) {FENstr += "q";}
+    }
+  }
+  FENstr += " ";
+  for (int i = 0; i < Piece::wPArr.size(); i++) {
+    if (Piece::wPArr[i]->getEnPassant()) {
+      FENstr += to_string(Piece::wPArr[i]->getSquareX());
+      FENstr += to_string(Piece::wPArr[i]->getSquareY());
+      break;
+    }
+  }
+  for (int i = 0; i < Piece::bPArr.size(); i++) {
+    if (Piece::bPArr[i]->getEnPassant()) {
+      FENstr += to_string(Piece::bPArr[i]->getSquareX());
+      FENstr += to_string(Piece::bPArr[i]->getSquareY());
+      break;
+    }
+  }
+
+  return FENstr;
 }

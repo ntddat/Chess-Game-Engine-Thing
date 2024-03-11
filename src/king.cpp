@@ -120,7 +120,7 @@ vector<tuple<int, int>> King::getValidSquares(int state[CHESS_SIDE][CHESS_SIDE])
   return validSquares;
 }
 
-bool King::makeMove(int state[CHESS_SIDE][CHESS_SIDE], int mouseX, int mouseY, int *fiftyMoveCheck) {
+bool King::makeMove(int state[CHESS_SIDE][CHESS_SIDE], int mouseX, int mouseY, int *fiftyMoveCheck, map<string, int> pastStates) {
   vector<tuple<int, int>> validSquares = this->getValidSquares(state);
   for (int i = 0; i < validSquares.size(); i++) {
     int currX = get<0>(validSquares[i]);
@@ -191,7 +191,7 @@ bool King::makeMove(int state[CHESS_SIDE][CHESS_SIDE], int mouseX, int mouseY, i
         canCastleK = false;
       }
 
-      changeState(state, squareX, squareY, currX, currY, isWhite, fiftyMoveCheck);
+      changeState(state, squareX, squareY, currX, currY, isWhite, fiftyMoveCheck, pastStates);
 
       squareX = currX;
       squareY = currY;
